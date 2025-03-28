@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  olap:
+    build: .  # Используем Dockerfile из текущей директории
+    container_name: clickhouse-olap
+    ports:
+      - "8123:8123"
+    environment:
+      CLICKHOUSE_DB: analytics_service
+      CLICKHOUSE_USER: admin
+      CLICKHOUSE_PASSWORD: ld7FcMbp3o~aK
+      CLICKHOUSE_ACCESS_MANAGEMENT: 1
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+
+volumes:
+  clickhouse-data:

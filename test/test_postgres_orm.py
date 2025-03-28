@@ -1,11 +1,11 @@
 from sqlalchemy.orm import Session
 
-from project.database import get_db, init_db
-from project.models.education import (EducationalInstitution,
-                                      EducationDirection, EducationLevel)
-from project.models.geography import District, Locality, LocalityType, Region
-from project.models.matching import Chat, Match, Message
-from project.models.user import Habitation, HabitationPhoto, User, UserPhoto
+from project.postgres_database import get_db, init_db
+from project.postgres.education import (EducationalInstitution,
+                                        EducationDirection, EducationLevel)
+from project.postgres.geography import District, Locality, LocalityType, Region
+from project.postgres.matching import Chat, Match, Message
+from project.postgres.user import Habitation, HabitationPhoto, User, UserPhoto
 
 # Инициализация БД
 init_db()
