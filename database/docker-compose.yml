@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  postgres:
+    build: .
+    environment:
+      POSTGRES_DB: neighbor_service
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: $4bCK%W(+^xA
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
