@@ -1,8 +1,0 @@
-<yandex>
-    <profiles>
-        <default>
-            <max_memory_usage>2000000000</max_memory_usage>
-            <allow_experimental_object_type>1</allow_experimental_object_type>
-        </default>
-    </profiles>
-</yandex>

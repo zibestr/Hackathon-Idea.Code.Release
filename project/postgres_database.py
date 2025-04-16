@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from project.postgres.base import Base
+from project.models.base import Base
 
 load_dotenv()
 HOST = os.getenv("POSTGRES_HOST")

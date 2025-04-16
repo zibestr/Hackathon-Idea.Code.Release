@@ -11,7 +11,21 @@ CREATE SEQUENCE user_photo_id_seq;
 CREATE SEQUENCE habitation_photo_id_seq;
 CREATE SEQUENCE match_id_seq;
 CREATE SEQUENCE message_id_seq;
-CREATE SEQUENCE chat_id_seq;
+CREATE SEQUENCE bad_habits_id_seq;
+CREATE SEQUENCE interest_id_seq;
+CREATE SEQUENCE user_response_id_seq;
+
+CREATE TABLE IF NOT EXISTS bad_habits (
+	id bigint NOT NULL UNIQUE DEFAULT nextval('bad_habits_id_seq'),
+	title varchar(100) NOT NULL,
+	PRIMARY KEY (id)
+);
+
+CREATE TABLE IF NOT EXISTS interest (
+	id bigint NOT NULL UNIQUE DEFAULT nextval('interest_id_seq'),
+	title varchar(100) NOT NULL,
+	PRIMARY KEY (id)
+);
 
 CREATE TABLE IF NOT EXISTS district (
 	id bigint NOT NULL UNIQUE DEFAULT nextval('district_id_seq'),
@@ -71,7 +85,8 @@ CREATE TABLE IF NOT EXISTS education_direction (
 CREATE TABLE IF NOT EXISTS users (
 	id bigint NOT NULL UNIQUE DEFAULT nextval('user_id_seq'),
 	ei_id bigint,
-	deleted boolean NOT NULL DEFAULT true,
+	is_active boolean NOT NULL DEFAULT true,
+	deleted boolean NOT NULL DEFAULT false,
 	name varchar(255) NOT NULL,
 	age bigint NOT NULL CHECK (age >= 18),
 	email varchar(255) NOT NULL UNIQUE CHECK (email ~ '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'),
@@ -85,11 +100,26 @@ CREATE TABLE IF NOT EXISTS users (
 	created_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	updated_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	last_log_moment timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	rating double precision,
+	rating double precision NOT NULL DEFAULT 5,
+	budget bigint,
 	PRIMARY KEY (id),
 	FOREIGN KEY (ei_id) REFERENCES educational_institution(id),
 	FOREIGN KEY (locality_id) REFERENCES locality(id),
 	FOREIGN KEY (education_direction) REFERENCES education_direction(id)
+);
+
+CREATE TABLE IF NOT EXISTS user_bad_habits (
+	user_id bigint NOT NULL,
+	bad_habits_id bigint NOT NULL,
+	FOREIGN KEY (user_id) REFERENCES users(id),
+	FOREIGN KEY (bad_habits_id) REFERENCES bad_habits(id)
+);
+
+CREATE TABLE IF NOT EXISTS user_interest (
+	user_id bigint NOT NULL,
+	interest_id bigint NOT NULL,
+	FOREIGN KEY (user_id) REFERENCES users(id),
+	FOREIGN KEY (interest_id) REFERENCES interest(id)
 );
 
 CREATE TABLE IF NOT EXISTS habitation (
@@ -99,6 +129,7 @@ CREATE TABLE IF NOT EXISTS habitation (
 	geo_coords jsonb NOT NULL,
 	link varchar(255) CHECK (link ~ '^(https?:\/\/)?(([a-zA-Z0-9-]+\.)?(avito\.ru|domclick\.ru|cian\.ru)|arenda\.yandex\.ru)(\/.*)?$'),
 	created_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	monthly_price bigint NOT NULL,
 	PRIMARY KEY (id),
 	FOREIGN KEY (user_id) REFERENCES users(id)
 );
@@ -121,35 +152,33 @@ CREATE TABLE IF NOT EXISTS habitation_photo (
 	FOREIGN KEY (habitation_id) REFERENCES habitation(id)
 );
 
-CREATE TABLE IF NOT EXISTS match (
-	id bigint NOT NULL UNIQUE DEFAULT nextval('match_id_seq'),
-	user_id1 bigint NOT NULL,
-	user_id2 bigint NOT NULL,
-	habitation_id bigint,
+CREATE TABLE IF NOT EXISTS user_response (
+	id bigint NOT NULL UNIQUE DEFAULT nextval('user_response_id_seq'),
 	created_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	response_user_id bigint NOT NULL,
+	request_user_id bigint NOT NULL,
 	PRIMARY KEY (id),
-	FOREIGN KEY (user_id1) REFERENCES users(id),
-	FOREIGN KEY (user_id2) REFERENCES users(id),
-	FOREIGN KEY (habitation_id) REFERENCES habitation(id)
+	FOREIGN KEY (response_user_id) REFERENCES users(id),
+	FOREIGN KEY (request_user_id) REFERENCES users(id)
 );
 
-CREATE TABLE IF NOT EXISTS chat (
-	id bigint NOT NULL UNIQUE DEFAULT nextval('chat_id_seq'),
-	match_id bigint NOT NULL,
+CREATE TABLE IF NOT EXISTS match (
+	id bigint NOT NULL UNIQUE DEFAULT nextval('match_id_seq'),
+	response_id bigint NOT NULL,
 	created_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY (id),
-	FOREIGN KEY (match_id) REFERENCES match(id)
+	FOREIGN KEY (response_id) REFERENCES user_response(id)
 );
 
 CREATE TABLE IF NOT EXISTS message (
 	id bigint NOT NULL UNIQUE DEFAULT nextval('message_id_seq'),
 	message varchar(255) NOT NULL,
 	user_id bigint NOT NULL,
-	chat_id bigint NOT NULL,
+	match_id bigint NOT NULL,
 	created_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY (id),
 	FOREIGN KEY (user_id) REFERENCES users(id),
-	FOREIGN KEY (chat_id) REFERENCES chat(id)
+	FOREIGN KEY (match_id) REFERENCES match(id)
 );
 
 CREATE TABLE IF NOT EXISTS user_score (
@@ -160,24 +189,6 @@ CREATE TABLE IF NOT EXISTS user_score (
 	PRIMARY KEY (user_from_id, user_to_id),
 	FOREIGN KEY (user_from_id) REFERENCES users(id),
 	FOREIGN KEY (user_to_id) REFERENCES users(id)
-);
-
-CREATE TABLE IF NOT EXISTS habitation_response (
-	created_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	habitation_id bigint NOT NULL,
-	request_user_id bigint NOT NULL,
-	PRIMARY KEY (habitation_id, request_user_id),
-	FOREIGN KEY (habitation_id) REFERENCES habitation(id),
-	FOREIGN KEY (request_user_id) REFERENCES users(id)
-);
-
-CREATE TABLE IF NOT EXISTS user_response (
-	created_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	response_user_id bigint NOT NULL,
-	request_user_id bigint NOT NULL,
-	PRIMARY KEY (response_user_id, request_user_id),
-	FOREIGN KEY (response_user_id) REFERENCES users(id),
-	FOREIGN KEY (request_user_id) REFERENCES users(id)
 );
 
 CREATE UNIQUE INDEX user_id_idx ON users(id);
@@ -203,12 +214,23 @@ CREATE UNIQUE INDEX habitation_photo_id_idx ON habitation_photo(id);
 
 CREATE UNIQUE INDEX match_id_idx ON match(id);
 
-CREATE UNIQUE INDEX chat_id_idx ON chat(id);
-
 CREATE UNIQUE INDEX message_id_idx ON message(id);
 
 CREATE UNIQUE INDEX user_score_idx ON user_score(user_from_id, user_to_id);
 
-CREATE UNIQUE INDEX habitation_response_idx ON habitation_response(habitation_id, request_user_id);
+CREATE UNIQUE INDEX user_response_idx ON user_response(id);
 
-CREATE UNIQUE INDEX user_reponse_idx ON user_response(response_user_id, request_user_id);
+CREATE UNIQUE INDEX user_reponse_pair_idx ON user_response(response_user_id, request_user_id);
+
+CREATE EXTENSION IF NOT EXISTS pg_cron;
+
+SELECT cron.schedule(
+    'deactivate_inactive_users',
+    '0 3 * * *',
+    $$
+    UPDATE users
+    SET is_active = FALSE
+    WHERE last_log_moment < CURRENT_DATE - INTERVAL '180 days'
+      AND is_active = TRUE;
+    $$
+);

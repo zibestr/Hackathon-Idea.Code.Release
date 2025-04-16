@@ -1,0 +1,46 @@
+name: "Neighborhood Service"
+
+
+services:
+  triton-server:
+    build: ./triton_inference
+    command: ["tritonserver", "--model-repository=/models"]
+    ports:
+        - "8000:8000"
+        - "8001:8001"
+        - "8002:8002"
+    networks:
+      - project-net
+
+  triton-orchestrator:
+    build: ./model_orchestrator
+    command: ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "7654"]      
+    ports:
+        - "7654:7654"
+    networks:
+      - project-net
+    depends_on:
+      - triton-server
+
+  postgres:
+      build: ./database
+      environment:
+        POSTGRES_DB: neighbor_service
+        POSTGRES_USER: admin
+        POSTGRES_PASSWORD: $4bCK%W(+^xA
+      ports:
+        - "5432:5432"
+      command: >
+        postgres
+        -c shared_preload_libraries=pg_cron
+        -c cron.database_name=neighbor_service
+      volumes:
+        - postgres_data:/var/lib/postgresql/data
+      networks:
+        - project-net
+
+networks:
+  project-net:
+
+volumes:
+  postgres_data:

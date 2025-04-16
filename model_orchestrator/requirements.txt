@@ -1,0 +1,5 @@
+fastapi
+uvicorn
+transformers
+tritonclient[http]
+torch

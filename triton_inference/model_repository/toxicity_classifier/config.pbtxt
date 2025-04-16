@@ -1,0 +1,24 @@
+name: "toxicity_classifier"
+platform: "pytorch_libtorch"
+max_batch_size: 0
+
+input [
+  {
+    name: "input_ids"
+    data_type: TYPE_INT64
+    dims: [ -1, 64 ]
+  },
+  {
+    name: "attention_mask"
+    data_type: TYPE_INT64
+    dims: [ -1, 64 ]
+  }
+]
+
+output [
+  {
+    name: "output"
+    data_type: TYPE_FP32
+    dims: [ -1, 5 ]
+  }
+]
