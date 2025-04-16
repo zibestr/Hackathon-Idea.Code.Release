@@ -1,0 +1,19 @@
+name: "user_ranking"
+platform: "pytorch_libtorch"
+max_batch_size: 0
+
+input [
+  {
+    name: "input_features"
+    data_type: TYPE_FP16
+    dims: [ -1, 64 ]
+  }
+]
+
+output [
+  {
+    name: "output"
+    data_type: TYPE_FP16
+    dims: [ -1, 1 ]
+  }
+]
