@@ -1,0 +1,10 @@
+{
+    "age_min": 18,
+    "age_max": 35,
+    "year_created_at_min": 2021,
+    "year_created_at_max": 2025,
+    "budget_min": 1000,
+    "budget_max": 100000,
+    "rating_min": 0.0,
+    "rating_max": 5.0
+}

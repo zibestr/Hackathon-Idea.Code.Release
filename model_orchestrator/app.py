@@ -2,14 +2,14 @@
 Сервер оркестрации запросов к моделям на Triton Inference Server
 author: <danila.yashin23@gmial.com>
 """
-# TODO: придумать фичи для модели ранжирования
+import json
 # TODO: обучить модель ранжирования на синтетических данных
-# TODO: прописать API для обращения к модели ранжирования
 import os
 
 import numpy as np
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, Field
+from schemas import (ModelReadiness, RankingPairRequest, RankingResponse,
+                     TextRequest, ToxicityReponse)
 from transformers import AutoTokenizer
 from tritonclient import http as tritonhttpclient
 
@@ -25,47 +25,6 @@ tokenizer = AutoTokenizer.from_pretrained(
 triton_client = tritonhttpclient.InferenceServerClient(
     url="triton-server:8000"
 )
-
-
-class TextRequest(BaseModel):
-    """Запрос к модели классификации токсичности текста.
-    Fields:
-        - text: str - Текст для классификации, максимальная длина 1000.
-    """
-    text: str = Field(example="Пример текста", max_length=1000)
-
-
-class ToxicityReponse(BaseModel):
-    """Ответ от модели классификации токсичности текста.
-    Fields:
-        - non_toxicity: float - Вероятность нетоксичности текста, от 0 до 1.
-        - insult: float - Вероятность оскорбления в тексте, от 0 до 1.
-        - obscenity: float - Вероятность непристойности текста, от 0 до 1.
-        - threat: float - Вероятность угрозы в тексте, от 0 до 1.
-        - dangerous: float - Вероятность текста нанести вред репутации
-        говорящего, от 0 до 1.
-    """
-    non_toxicity: float = Field(ge=0, le=1)
-    insult: float = Field(ge=0, le=1)
-    obscenity: float = Field(ge=0, le=1)
-    threat: float = Field(ge=0, le=1)
-    dangerous: float = Field(ge=0, le=1)
-
-
-class RankingPairRequest(BaseModel):
-    """Запрос к моделе ранжирования пар пользователей.
-    Fields:
-        TODO: придумать фичи
-    """
-    pass
-
-
-class RankingResponse(BaseModel):
-    """Ответ модели ранжирования пар пользователей.
-    Fields:
-        - coincidence: float - Вероятность совпадения пользователей, от 0 до 1.
-    """
-    coincidence: float = Field(default=0.0, ge=0, le=1)
 
 
 def predict_toxicity(text: str) -> dict[str, float]:
@@ -121,12 +80,66 @@ def predict_coincidence(request: RankingPairRequest) -> dict[str, float]:
     Функция обращения к Triton Inference Server модели user_ranking
     по HTTP протоколу.
     Args:
-        TODO: вот тут все к свиням заменить
+        request: RankingPairRequest - запрос с данными двух пользователей.
     Returns:
         dict[str, float]: словарь с вероятностью сходства двух пользователей.
     """
-    from random import random
-    return {"coincidence": random()}
+    file_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        "user-ranking/config.json"
+    )
+    with open(file_path, "r", encoding="UTF-8") as file:
+        min_max_values = json.load(file)
+    request = request.model_dump()
+    min_max_scale = lambda value, min_, max_: (value - min_) / (max_ - min_)
+    for feature in ("age", "year_created_at", "budget", "rating"):
+        request[feature + "_main"] = min_max_scale(
+            request[feature + "_main"],
+            min_max_values[feature + "_min"],
+            min_max_values[feature + "_max"]
+        )
+        request[feature + "_candidate"] = min_max_scale(
+            request[feature + "_candidate"],
+            min_max_values[feature + "_min"],
+            min_max_values[feature + "_max"]
+        )
+    numerical_features = ["age_main", "year_created_at_main",
+                          "budget_main", "rating_main",
+                          "age_candidate", "year_created_at_candidate",
+                          "budget_candidate", "rating_candidate"]
+    cat_features = ["ei_id_main",
+                    "education_direction_main",
+                    "ei_id_candidate",
+                    "education_direction_candidate"]
+
+    input_numerical = np.array([request[col]
+                                for col in numerical_features]).reshape(1, -1)
+    input_categorical = np.array([request[col]
+                                  for col in cat_features]).reshape(1, -1)
+
+    num_input = tritonhttpclient.InferInput(
+        "num_input",
+        input_numerical.shape,
+        "FP32"
+    )
+    cat_input = tritonhttpclient.InferInput(
+        "cat_input",
+        input_categorical.shape,
+        "INT64"
+    )
+
+    num_input.set_data_from_numpy(input_numerical.astype(np.float32))
+    cat_input.set_data_from_numpy(
+        input_categorical.astype(np.int64)
+    )
+
+    response = triton_client.infer(
+        model_name="user_ranking",
+        inputs=[num_input, cat_input]
+    )
+
+    output = response.as_numpy("output")
+    return {"coincidence": float(output[0])}
 
 
 @app.post("/ranking_pair", response_model=RankingResponse)
@@ -171,12 +184,22 @@ def toxicity_endpoint(request: TextRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.get("/check_model_toxicity")
+@app.get("/check_model_toxicity", response_model=ModelReadiness)
 async def check_toxicity_model():
     """API проверки доступности модели для опеределения токсичности текста."""
     try:
         is_ready = triton_client.is_model_ready("toxicity_classifier")
-        return {"status": "ready" if is_ready else "not ready"}
+        return {"ready": is_ready}
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@app.get("/check_model_ranking", response_model=ModelReadiness)
+async def check_ranking_model():
+    """API проверки доступности модели для опеределения токсичности текста."""
+    try:
+        is_ready = triton_client.is_model_ready("user_ranking")
+        return {"ready": is_ready}
     except Exception as e:
         return {"error": str(e)}
 
