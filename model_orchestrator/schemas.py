@@ -45,6 +45,13 @@ class RankingPairRequest(BaseModel):
         пользователя, осуществляющего поиск.
         - budget_main: int - бюджет пользователя, осуществляющего поиск.
         - rating_main: float - рейтинг пользователя, осуществляющего поиск.
+        - gender_main: int - пол пользователя, осуществляющего поиск,
+        0 - девушка, 1 - мужчина.
+        - habit_ids_main: list[int] - список id вредных привычек пользователя,
+        осуществляющего поиск.
+        - interest_ids_main: list[int] - список id интересов пользователя,
+        осуществляющего поиск.
+
         - ei_id_candidate: int - университет кандидата.
         - age_candidate: int - возраст кандидата.
         - education_direction_candidate: int - образовательное учреждение
@@ -53,6 +60,10 @@ class RankingPairRequest(BaseModel):
         кандидата.
         - budget_candidate: int - бюджет кандидата.
         - rating_candidate: float - рейтинг кандидата.
+        - gender_candidate: int - пол кандидата.
+        - habit_ids_candidate: list[int] - список id вредных привычек
+        кандидата.
+        - interest_ids_candidate: list[int] - список id интересов кандидата.
     """
     ei_id_main: int
     age_main: int
@@ -60,6 +71,9 @@ class RankingPairRequest(BaseModel):
     year_created_at_main: int
     budget_main: int
     rating_main: float
+    gender_main: int = Field(ge=0, le=1)
+    habit_ids_main: list[int]
+    interest_ids_main: list[int]
 
     ei_id_candidate: int
     age_candidate: int
@@ -67,6 +81,9 @@ class RankingPairRequest(BaseModel):
     year_created_at_candidate: int
     budget_candidate: int
     rating_candidate: float
+    gender_candidate: int = Field(ge=0, le=1)
+    habit_ids_candidate: list[int]
+    interest_ids_candidate: list[int]
 
 
 class RankingResponse(BaseModel):

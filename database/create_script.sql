@@ -102,6 +102,7 @@ CREATE TABLE IF NOT EXISTS users (
 	last_log_moment timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	rating double precision NOT NULL DEFAULT 5,
 	budget bigint,
+	gender smallint,
 	PRIMARY KEY (id),
 	FOREIGN KEY (ei_id) REFERENCES educational_institution(id),
 	FOREIGN KEY (locality_id) REFERENCES locality(id),

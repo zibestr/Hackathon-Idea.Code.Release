@@ -22,9 +22,37 @@ tokenizer = AutoTokenizer.from_pretrained(
     tokenizer_path,
     local_files_only=True
 )
+
+minmax_path = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)),
+    "user-ranking/config.json"
+)
+with open(minmax_path, "r", encoding="UTF-8") as file:
+    min_max_values = json.load(file)
+VEC_DIM = 50
+
 triton_client = tritonhttpclient.InferenceServerClient(
     url="triton-server:8000"
 )
+
+
+def _min_max_scale(value, min_, max_) -> float:
+    return (value - min_) / (max_ - min_)
+
+
+def decoder2vector(ids: list[int]) -> np.ndarray:
+    """Кодирует перечень интересов или вредных привычек в вектор
+
+    Args:
+        ids (list[int]): id интересов или вредных привычек
+
+    Returns:
+        np.ndarray: закодированная фича
+    """
+    vec = np.zeros(shape=(1, VEC_DIM), dtype=np.int64)
+    for id_ in ids:
+        vec[0, id_ - 1] = 1
+    return vec
 
 
 def predict_toxicity(text: str) -> dict[str, float]:
@@ -84,21 +112,14 @@ def predict_coincidence(request: RankingPairRequest) -> dict[str, float]:
     Returns:
         dict[str, float]: словарь с вероятностью сходства двух пользователей.
     """
-    file_path = os.path.join(
-        os.path.dirname(os.path.abspath(__file__)),
-        "user-ranking/config.json"
-    )
-    with open(file_path, "r", encoding="UTF-8") as file:
-        min_max_values = json.load(file)
     request = request.model_dump()
-    min_max_scale = lambda value, min_, max_: (value - min_) / (max_ - min_)
     for feature in ("age", "year_created_at", "budget", "rating"):
-        request[feature + "_main"] = min_max_scale(
+        request[feature + "_main"] = _min_max_scale(
             request[feature + "_main"],
             min_max_values[feature + "_min"],
             min_max_values[feature + "_max"]
         )
-        request[feature + "_candidate"] = min_max_scale(
+        request[feature + "_candidate"] = _min_max_scale(
             request[feature + "_candidate"],
             min_max_values[feature + "_min"],
             min_max_values[feature + "_max"]
@@ -106,16 +127,27 @@ def predict_coincidence(request: RankingPairRequest) -> dict[str, float]:
     numerical_features = ["age_main", "year_created_at_main",
                           "budget_main", "rating_main",
                           "age_candidate", "year_created_at_candidate",
-                          "budget_candidate", "rating_candidate"]
+                          "budget_candidate", "rating_candidate",
+                          "gender_main", "gender_candidate"]
     cat_features = ["ei_id_main",
                     "education_direction_main",
                     "ei_id_candidate",
                     "education_direction_candidate"]
+    habit_features = ["habit_ids_main", "habit_ids_candidate"]
+    interest_features = ["interest_ids_main", "interest_ids_candidate"]
 
     input_numerical = np.array([request[col]
                                 for col in numerical_features]).reshape(1, -1)
     input_categorical = np.array([request[col]
                                   for col in cat_features]).reshape(1, -1)
+    input_habit = np.expand_dims(np.concatenate(
+        [decoder2vector(request[col])
+         for col in habit_features]
+    ), axis=0)
+    input_interest = np.expand_dims(np.concatenate(
+        [decoder2vector(request[col])
+         for col in interest_features]
+    ), axis=0)
 
     num_input = tritonhttpclient.InferInput(
         "num_input",
@@ -127,15 +159,27 @@ def predict_coincidence(request: RankingPairRequest) -> dict[str, float]:
         input_categorical.shape,
         "INT64"
     )
+    habits_input = tritonhttpclient.InferInput(
+        "habits_input",
+        input_habit.shape,
+        "INT64"
+    )
+    interest_input = tritonhttpclient.InferInput(
+        "interest_input",
+        input_interest.shape,
+        "INT64"
+    )
 
     num_input.set_data_from_numpy(input_numerical.astype(np.float32))
     cat_input.set_data_from_numpy(
         input_categorical.astype(np.int64)
     )
+    habits_input.set_data_from_numpy(input_habit.astype(np.int64))
+    interest_input.set_data_from_numpy(input_interest.astype(np.int64))
 
     response = triton_client.infer(
         model_name="user_ranking",
-        inputs=[num_input, cat_input]
+        inputs=[num_input, cat_input, habits_input, interest_input]
     )
 
     output = response.as_numpy("output")

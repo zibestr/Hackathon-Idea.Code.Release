@@ -6,12 +6,22 @@ input [
   {
     name: "num_input"
     data_type: TYPE_FP32
-    dims: [ -1, 8 ]
+    dims: [ -1, 10 ]
   },
   {
     name: "cat_input"
     data_type: TYPE_INT64
     dims: [ -1, 4 ]
+  },
+  {
+    name: "habits_input"
+    data_type: TYPE_INT64
+    dims: [ -1, 2, 50 ]
+  },
+    {
+    name: "interest_input"
+    data_type: TYPE_INT64
+    dims: [ -1, 2, 50 ]
   }
 ]
 
