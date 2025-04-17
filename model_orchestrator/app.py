@@ -2,15 +2,18 @@
 Сервер оркестрации запросов к моделям на Triton Inference Server
 author: <danila.yashin23@gmial.com>
 """
+import base64
+import io
 import json
-# TODO: обучить модель ранжирования на синтетических данных
 import os
 
 import numpy as np
 from fastapi import FastAPI, HTTPException
-from schemas import (ModelReadiness, RankingPairRequest, RankingResponse,
-                     TextRequest, ToxicityReponse)
-from transformers import AutoTokenizer
+from PIL import Image
+from schemas import (ModelReadiness, NSFWRequest, NSFWResponse,
+                     RankingPairRequest, RankingResponse, TextRequest,
+                     ToxicityResponse)
+from transformers import AutoTokenizer, ViTImageProcessor
 from tritonclient import http as tritonhttpclient
 
 app = FastAPI()
@@ -20,6 +23,15 @@ tokenizer_path = os.path.join(
 )
 tokenizer = AutoTokenizer.from_pretrained(
     tokenizer_path,
+    local_files_only=True
+)
+preprocessor_path = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)),
+    "nsfw-detector/preprocessor"
+)
+os.listdir(preprocessor_path)
+image_preprocessor = ViTImageProcessor.from_pretrained(
+    preprocessor_path,
     local_files_only=True
 )
 
@@ -186,8 +198,38 @@ def predict_coincidence(request: RankingPairRequest) -> dict[str, float]:
     return {"coincidence": float(output[0])}
 
 
+def predict_nsfw(image: Image.Image) -> dict[str, float]:
+    """
+    Функция обращения к Triton Inference Server модели nsfw-detector
+    по HTTP протоколу.
+    Args:
+        image: PIL.Image.Image - изображение пользователей.
+    Returns:
+        dict[str, float]: словарь с вероятностью NSFW контента на изображение.
+    """
+    inputs = np.asarray(image_preprocessor(image)["pixel_values"],
+                        dtype=np.float32)
+    image_input = tritonhttpclient.InferInput(
+        "image",
+        inputs.shape,
+        "FP32"
+    )
+    image_input.set_data_from_numpy(inputs.astype(np.float32))
+
+    response = triton_client.infer(
+        model_name="nsfw_detector",
+        inputs=[image_input]
+    )
+
+    output = response.as_numpy("output")
+    return {
+        "normal": float(output[0, 0]),
+        "nsfw": float(output[0, 1])
+    }
+
+
 @app.post("/ranking_pair", response_model=RankingResponse)
-def compare_pair(request: RankingPairRequest):
+async def compare_pair(request: RankingPairRequest):
     """Endpoint API модели ранжирования пользователей
 
     Args:
@@ -207,8 +249,8 @@ def compare_pair(request: RankingPairRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/predict_toxicity", response_model=ToxicityReponse)
-def toxicity_endpoint(request: TextRequest):
+@app.post("/predict_toxicity", response_model=ToxicityResponse)
+async def toxicity_endpoint(request: TextRequest):
     """Endpoint API модели классификации токсичности
 
     Args:
@@ -223,6 +265,29 @@ def toxicity_endpoint(request: TextRequest):
     """
     try:
         response = predict_toxicity(request.text)
+        return response
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/predict_nsfw", response_model=NSFWResponse)
+async def nsfw_endpoint(request: NSFWRequest):
+    """Endpoint API модели определения NSFW контента на изображение
+
+    Args:
+        request (NSFWRequest): Запрос к модели.
+
+    Raises:
+        HTTPException: 500 ошибка, если есть проблемы на стороне Triton
+        Inference Server
+
+    Returns:
+        NSFWReponse: Ответ модели.
+    """
+    try:
+        image_data = base64.b64decode(request.image)
+        image = Image.open(io.BytesIO(image_data)).convert("RGB")
+        response = predict_nsfw(image)
         return response
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -249,6 +314,6 @@ async def check_ranking_model():
 
 
 @app.get("/health")
-def health():
+async def health():
     """API проверки доступности сервиса оркестрации моделей."""
     return {"status": "ok"}

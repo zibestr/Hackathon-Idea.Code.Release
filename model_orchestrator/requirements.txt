@@ -3,3 +3,4 @@ uvicorn
 transformers
 tritonclient[http]
 torch
+pillow

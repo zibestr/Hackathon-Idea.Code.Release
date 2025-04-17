@@ -17,7 +17,7 @@ class TextRequest(BaseModel):
     text: str = Field(example="Пример текста", max_length=1000)
 
 
-class ToxicityReponse(BaseModel):
+class ToxicityResponse(BaseModel):
     """Ответ от модели классификации токсичности текста.
     Fields:
         - non_toxicity: float - Вероятность нетоксичности текста, от 0 до 1.
@@ -92,3 +92,23 @@ class RankingResponse(BaseModel):
         - coincidence: float - Вероятность совпадения пользователей, от 0 до 1.
     """
     coincidence: float = Field(default=0.0, ge=0, le=1)
+
+
+class NSFWRequest(BaseModel):
+    """Запрос к модели определения NSFW контента на изображение.
+
+    Fields:
+        image: str - base64 код изображения
+    """
+    image: str
+
+
+class NSFWResponse(BaseModel):
+    """Ответ модели определения NSFW контента на изображение.
+
+    Fields:
+        normal: float - 0 если на изображение нет NSFW.
+        nsfw: float - 1 если на изображение есть NSFW.
+    """
+    normal: float = Field(ge=0, le=1)
+    nsfw: float = Field(ge=0, le=1)
