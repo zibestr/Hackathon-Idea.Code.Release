@@ -313,11 +313,11 @@ async def check_ranking_model():
         return {"error": str(e)}
 
 
-@app.get("/check_model_ranking", response_model=ModelReadiness)
-async def check_ranking_model():
+@app.get("/check_nsfw_model", response_model=ModelReadiness)
+async def check_nsfw_model():
     """API проверки доступности модели для опеределения токсичности текста."""
     try:
-        is_ready = triton_client.is_model_ready("user_ranking")
+        is_ready = triton_client.is_model_ready("nsfw_detector")
         return {"ready": is_ready}
     except Exception as e:
         return {"error": str(e)}
