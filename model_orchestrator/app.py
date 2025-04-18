@@ -313,7 +313,11 @@ async def check_ranking_model():
         return {"error": str(e)}
 
 
-@app.get("/health")
-async def health():
-    """API проверки доступности сервиса оркестрации моделей."""
-    return {"status": "ok"}
+@app.get("/check_model_ranking", response_model=ModelReadiness)
+async def check_ranking_model():
+    """API проверки доступности модели для опеределения токсичности текста."""
+    try:
+        is_ready = triton_client.is_model_ready("user_ranking")
+        return {"ready": is_ready}
+    except Exception as e:
+        return {"error": str(e)}
