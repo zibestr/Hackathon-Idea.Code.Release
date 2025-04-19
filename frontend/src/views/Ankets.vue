@@ -1,8 +1,17 @@
 <script setup>
 import IconStrelka from '../assets/icons/IconStrelka.vue'
 import IconRightStrelka from '../assets/icons/IconRightStrelka.vue'
+
 import Line from '../Components/RegLine.vue'
 import MainAnketBox from '../Components/AnketMainBox.vue'
+import NoHomeChioce from '../Components/NoHomeAnket.vue'
+import HaveHomeChoice from '../Components/HaveHomeAnket.vue'
+
+import CitiesList from '../Components/Lists/CitiesList.vue'
+import RegionsList from '../Components/Lists/RegionsList.vue'
+import LearnWaysList from '../Components/Lists/LearnWaysList.vue'
+import InterestList from '../Components/Lists/InterestsList.vue'
+import BadInterestsList from '../Components/Lists/BadInterestsList.vue'
 </script>
 
 <template>
@@ -38,12 +47,18 @@ import MainAnketBox from '../Components/AnketMainBox.vue'
             <input placeholder="Регион">
             <IconRightStrelka />
         </div>
+        <div>
+            <RegionsList /> 
+        </div>
     </div>
     <div class="anket_input_div">
         <h3>Город</h3>
         <div class="region_input">
             <input placeholder="Город">
             <IconRightStrelka />
+        </div>
+        <div>
+            <CitiesList />
         </div>
     </div>
     <div class="anket_input_div">
@@ -52,6 +67,9 @@ import MainAnketBox from '../Components/AnketMainBox.vue'
             <input placeholder="Направление обучения">
             <IconRightStrelka />
         </div>
+        <div>
+            <LearnWaysList />
+        </div>
     </div>
     <div class="anket_input_div">
         <h3>Интересы</h3>
@@ -59,12 +77,18 @@ import MainAnketBox from '../Components/AnketMainBox.vue'
             <input placeholder="Интересы">
             <IconRightStrelka />
         </div>
+        <div>
+            <InterestList />
+        </div>
     </div>
     <div class="anket_input_div">
-        <h3>Направление обучения</h3>
+        <h3>Вредные привычки</h3>
         <div class="region_input">
             <input placeholder="Вредные привычки">
             <IconRightStrelka />
+        </div>
+        <div>
+            <BadInterestsList />
         </div>
     </div>
     <div class="house_div">
@@ -81,6 +105,12 @@ import MainAnketBox from '../Components/AnketMainBox.vue'
         <p>В поиске</p>
         </div>
         </button>
+    </div>
+    <div>
+        <NoHomeChioce />
+    </div>
+    <div>
+        <HaveHomeChoice />
     </div>
     <div class="anket_input_div">
         <h3>О себе</h3>
