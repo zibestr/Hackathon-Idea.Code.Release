@@ -6,7 +6,7 @@ from fastapi.responses import JSONResponse
 from db.queries import write_opinion
 from chat import ConnectionManager
 from contextlib import asynccontextmanager
-from typing import Dict
+from typing import Dict, List
 import uuid
 
 from config import settings
@@ -58,6 +58,28 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 @app.get("me/", response_model=User)
 async def read_users_me(current_user: User = Depends(get_current_active_user)):
     return current_user
+
+
+@app.get("/regions", response_model=List[str])
+async def get_all_regions():
+    async with get_session() as session:
+        result = await session.exec(select(Region.title))
+        return result.all()
+    
+
+@app.get("/regions/{region_title}/cities", response_model=List[str])
+async def get_cities_by_region(region_title: str):
+    async with get_session() as session:
+        region_result = await session.exec(select(Region).where(Region.title == region_title))
+        region = region_result.first()
+
+        if not region:
+            raise HTTPException(status_code=404, detail="Регион не найден")
+
+        cities_result = await session.exec(
+            select(Locality.name).where(Locality.region_id == region.id)
+        )
+        return cities_result.all()
 
 
 @app.websocket("/chat/{user_id_req}/{user_id_rep}/{opinion}")

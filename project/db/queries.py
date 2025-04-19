@@ -42,6 +42,8 @@ async def get_user_by_email(email: str) -> Optional[User]:
         return result.first()
 
 
+
+
 async def create_user(fields: Dict[str, Any]) -> User:
     # danya model
     async with get_session() as session:
