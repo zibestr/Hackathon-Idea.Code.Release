@@ -19,6 +19,7 @@ COPY utils ./utils
 COPY auth.py .
 COPY config.py .
 COPY main.py .
+COPY .env .
 
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8100", "--reload"]
 
