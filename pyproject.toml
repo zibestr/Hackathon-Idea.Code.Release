@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "tbank"
+version = "0.1.0"
+description = ""
+authors = ["pyalexos <aligos@yandex.ru>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.115.12"
+uvicorn = "^0.34.0"
+jinja2 = "^3.1.6"
+python-multipart = "^0.0.20"
+aiogram = "^3.19.0"
+python-dotenv = "^1.1.0"
+aiosqlite = "^0.21.0"
+sqlalchemy = "^2.0.40"
+sqlacodegen = "^3.0.0"
+sqlalchemy-utils = "^0.41.2"
+pydantic-settings = "^2.9.1"
+sqlmodel = "^0.0.24"
+psycopg-binary = "^3.2.6"
+psycopg = "^3.2.6"
+asyncpg = "^0.30.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
