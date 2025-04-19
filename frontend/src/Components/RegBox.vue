@@ -12,9 +12,9 @@
     <input class="auth_input" placeholder="Логин">
     <input class="auth_input" placeholder="Пароль">
     <input class="auth_input" placeholder="Повтор пароля">
-    <a class="authreg_button">Зарегистрироваться</a>
+    <a class="authreg_button" href="/createanket">Зарегистрироваться</a>
     <div class="to_reg">
-        <a>Вход</a>
+        <a href="/auth">Вход</a>
     </div>
     </div>
 </div>
