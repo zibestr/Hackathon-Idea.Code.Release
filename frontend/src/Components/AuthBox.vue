@@ -1,4 +1,13 @@
-<script>
+<script setup>
+
+import { LineStore } from '../stores/LineStates';
+
+const store = LineStore()
+
+const SetLines = () => {
+    store.change_value('reg_second_line', false);
+    store.change_value('reg_third_line', false);
+}
 
 </script>
 
@@ -13,7 +22,7 @@
     <a class="authreg_button">Войти</a>
     <div class="to_reg">
         <p>Нет аккаунта?</p>
-        <a href="/regestration">Зарегистрироваться</a>
+        <a href="/regestration" @click="SetLines">Зарегистрироваться</a>
     </div>
     </div>
 </div>

@@ -12,6 +12,10 @@ import RegionsList from '../Components/Lists/RegionsList.vue'
 import LearnWaysList from '../Components/Lists/LearnWaysList.vue'
 import InterestList from '../Components/Lists/InterestsList.vue'
 import BadInterestsList from '../Components/Lists/BadInterestsList.vue'
+
+import { LineStore } from '../stores/LineStates'
+
+const store = LineStore();
 </script>
 
 <template>
@@ -20,7 +24,7 @@ import BadInterestsList from '../Components/Lists/BadInterestsList.vue'
         <Line />
     </div>
     <div class="strelka_div">
-        <a href="/regestration"><IconStrelka /></a>
+        <a href="/regestration" @click="store.change_value('reg_second_line', false)"><IconStrelka /></a>
     </div>
     <div class="anket_position_2">
     <div class="anket_position">
@@ -117,6 +121,8 @@ import BadInterestsList from '../Components/Lists/BadInterestsList.vue'
         <textarea placeholder="О себе" class="text_input">О себе</textarea>
     </div>
 </div>
+<a href="/" class="authreg_button" @click="store.change_value('reg_third_line', true)">Создать анкету</a>
+
 </div>
 </div>
 </template>
