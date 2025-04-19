@@ -3,17 +3,22 @@ from pathlib import Path
 from io import BytesIO
 from PIL import Image
 import asyncio
+import aiofiles
+from config import settings
 
-def _process_and_save_image(file_path: Path, base64_str: str):
-    if "," in base64_str:
-        base64_str = base64_str.split(",")[1]
 
-    image_data = base64.b64decode(base64_str)
+async def _process_and_save_image(file_path: Path, base64_str: str):
+    image_data = base64.b64decode(base64_str.split(",")[-1])
     image = Image.open(BytesIO(image_data)).convert("RGB")
-    image.save(file_path, format="JPEG")
 
-async def save_image(user_id: int, base64_str: str, category: str, base_dir="__data__") -> str:
-    user_dir = Path(base_dir) / str(user_id)
+    buffer = BytesIO()
+    image.save(buffer, format="JPEG")
+    async with aiofiles.open(file_path, 'wb') as image_file:
+        await image_file.write(buffer.getvalue())
+
+
+async def save_image(user_id: int, base64_str: str, category: str) -> str:
+    user_dir = Path(settings.data_path) / str(user_id)
     user_dir.mkdir(parents=True, exist_ok=True)
 
     existing_files = list(user_dir.glob(f"{user_id}_{category}_*.jpg"))
@@ -34,22 +39,9 @@ async def save_image(user_id: int, base64_str: str, category: str, base_dir="__d
     file_path = user_dir / filename
 
     try:
-        # Выполняем сохранение в отдельном потоке
         loop = asyncio.get_running_loop()
         await loop.run_in_executor(None, _process_and_save_image, file_path, base64_str)
     except Exception as e:
         raise ValueError(f"Ошибка при обработке изображения: {e}")
 
     return str(file_path)
-
-
-import asyncio
-
-async def main():
-    with open("test.png", "rb") as f:
-        b64 = base64.b64encode(f.read()).decode("utf-8")
-    path = await save_image(1, b64, "cat")
-    print("Сохранено в:", path)
-
-asyncio.run(main())
-

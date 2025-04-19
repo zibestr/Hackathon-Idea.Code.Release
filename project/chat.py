@@ -1,8 +1,8 @@
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from typing import Dict, Tuple
 
-manager = ConnectionManager()
 router = APIRouter()
+
 
 @router.websocket("/ws/{user_id}/{target_id}")
 async def chat(websocket: WebSocket, user_id: int, target_id: int):
@@ -13,7 +13,6 @@ async def chat(websocket: WebSocket, user_id: int, target_id: int):
             await manager.send_personal_message(user_id, target_id, data)
     except WebSocketDisconnect:
         manager.disconnect(user_id, target_id)
-
 
 
 class ConnectionManager:
@@ -43,3 +42,5 @@ class ConnectionManager:
         for uid, conn in connections.items():
             await conn.send_text(f"{sender_id}: {message}")
 
+
+manager = ConnectionManager()

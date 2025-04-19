@@ -50,12 +50,16 @@ except (ModuleNotFoundError, ImportError) as e:
         Message
     )
 
-from .queries import get_user_by_email
+from .queries import (
+    get_user_by_email
+)
 
 __all__ = [
+    # connections
     'create_models',
     'init_db',
     'get_session',
+    # models
     'BadHabit',
     'District',
     'EducationLevel',
@@ -73,5 +77,7 @@ __all__ = [
     'UserScore',
     'HabitationPhoto',
     'Match',
-    'Message'
+    'Message',
+    # queries
+    'get_user_by_email',
 ]

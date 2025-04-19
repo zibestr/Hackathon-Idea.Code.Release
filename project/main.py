@@ -3,7 +3,6 @@ from typing import AsyncGenerator
 from fastapi import FastAPI, Request, HTTPException, Depends, status
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.responses import JSONResponse
-from fastapi.templating import Jinja2Templates
 from contextlib import asynccontextmanager
 from typing import Dict
 import uuid
@@ -27,15 +26,15 @@ from utils import (setup_logger,
                    UserInDB
 )
 
-templates = Jinja2Templates(directory="templates")
-#@asynccontextmanager
-#async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
-#    await init_db()
-#    yield
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+   await init_db()
+   yield
 
 
-#app = FastAPI(lifespan=lifespan)
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
+
 
 class ConnectionManager:
     def __init__(self):
@@ -97,9 +96,10 @@ async def app_exception_handler(request: Request, exc: HTTPException):
     )
 
 
-@app.get("/")
-async def get(request: Request):
-    return templates.TemplateResponse("chat.html", {"request": request})
+#TODO MOVE route
+# @app.get("/")
+# async def get(request: Request):
+#     return {"request": request}
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):

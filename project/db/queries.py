@@ -1,6 +1,6 @@
 import redis
 import json
-from sqlmodel import select, and_
+from sqlmodel import select, and_, or_
 from typing import Optional, List, Dict, Any
 import random
 from db import (

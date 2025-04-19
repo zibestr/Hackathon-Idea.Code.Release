@@ -1,4 +1,5 @@
 from .logger import setup_logger, logs
+from .image_save import save_image
 from .schemas import (
     ModelReadiness,
     TextRequest,
@@ -9,12 +10,12 @@ from .schemas import (
     User,
     UserInDB
 )
-from .chat import router as chat_router
-from .image_save import save_image 
 
 __all__ = [
+    # logging
     'logs',
     'setup_logger',
+    # schemas
     'ModelReadiness',
     'TextRequest',
     'RankingPairRequest',

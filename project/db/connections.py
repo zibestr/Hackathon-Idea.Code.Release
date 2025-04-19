@@ -7,7 +7,7 @@ from sqlacodegen.generators import DeclarativeGenerator
 from contextlib import asynccontextmanager
 import aiofiles
 
-from typing import AsyncGenerator
+from typing import AsyncGenerator, Callable
 from utils import logs
 from config import settings
 
@@ -15,7 +15,7 @@ DB_URI = f'postgresql+asyncpg://{settings.postgres_db_user}:{settings.postgres_d
          f'@{settings.postgres_host}:{settings.postgres_port}/{settings.postgres_db_name}'
 connect_args = {"check_same_thread": False}
 engine = create_async_engine(DB_URI)
-make_session = sessionmaker(bind=engine, class_=AsyncSession)
+make_session: Callable = sessionmaker(bind=engine, class_=AsyncSession)
 
 
 @logs
@@ -43,7 +43,5 @@ async def init_db() -> None:
 @logs
 @asynccontextmanager
 async def get_session() -> AsyncGenerator[AsyncSession, None]:
-    yield make_session()
-    # async_session = sessionmaker(bind=engine, class_=AsyncSession)
-    # async with async_session() as session:
-    #     yield session
+    async with make_session() as session:
+        yield session
