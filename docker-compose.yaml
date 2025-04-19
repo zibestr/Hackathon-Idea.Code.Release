@@ -1,6 +1,3 @@
-name: "neighborhood_service"
-
-
 services:
   triton-server:
     build: ./triton_inference
@@ -27,7 +24,7 @@ services:
       environment:
         POSTGRES_DB: neighbor_service
         POSTGRES_USER: admin
-        POSTGRES_PASSWORD: $4bCK%W(+^xA
+        POSTGRES_PASSWORD: $$4bCK%W(+^xA
       ports:
         - "5432:5432"
       command: >

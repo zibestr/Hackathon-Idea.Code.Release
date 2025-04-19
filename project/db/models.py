@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from sqlalchemy import BigInteger, Boolean, CheckConstraint, Column, DateTime, Double, ForeignKeyConstraint, Index, PrimaryKeyConstraint, Sequence, String, Table, UniqueConstraint, text
+from sqlalchemy import BigInteger, Boolean, CheckConstraint, Column, DateTime, Double, ForeignKeyConstraint, Index, PrimaryKeyConstraint, Sequence, SmallInteger, String, Table, UniqueConstraint, text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 import datetime
@@ -29,7 +29,7 @@ class District(Base):
     )
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
-    name: Mapped[str] = mapped_column(String(255))
+    title: Mapped[str] = mapped_column(String(255))
 
     regions: Mapped[List['Region']] = relationship('Region', back_populates='district')
 
@@ -58,19 +58,6 @@ class Interest(Base):
     users: Mapped[List['User']] = relationship('User', secondary='user_interest', back_populates='interests')
 
 
-class LocalityType(Base):
-    __tablename__ = 'locality_type'
-    __table_args__ = (
-        PrimaryKeyConstraint('id', name='locality_type_pkey'),
-        Index('locality_type_id_idx', 'id', unique=True)
-    )
-
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
-    name: Mapped[str] = mapped_column(String(255))
-
-    localities: Mapped[List['Locality']] = relationship('Locality', back_populates='type')
-
-
 class EducationDirection(Base):
     __tablename__ = 'education_direction'
     __table_args__ = (
@@ -97,7 +84,7 @@ class Region(Base):
     )
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
-    name: Mapped[str] = mapped_column(String(255))
+    title: Mapped[str] = mapped_column(String(255))
     district_id: Mapped[int] = mapped_column(BigInteger)
 
     district: Mapped['District'] = relationship('District', back_populates='regions')
@@ -127,18 +114,15 @@ class Locality(Base):
     __tablename__ = 'locality'
     __table_args__ = (
         ForeignKeyConstraint(['region_id'], ['region.id'], name='locality_region_id_fkey'),
-        ForeignKeyConstraint(['type_id'], ['locality_type.id'], name='locality_type_id_fkey'),
         PrimaryKeyConstraint('id', name='locality_pkey'),
         Index('locality_id_idx', 'id', unique=True)
     )
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
-    type_id: Mapped[int] = mapped_column(BigInteger)
     region_id: Mapped[int] = mapped_column(BigInteger)
     name: Mapped[str] = mapped_column(String(255))
 
     region: Mapped['Region'] = relationship('Region', back_populates='localities')
-    type: Mapped['LocalityType'] = relationship('LocalityType', back_populates='localities')
     userss: Mapped[List['User']] = relationship('User', back_populates='locality')
 
 
@@ -146,7 +130,7 @@ class User(Base):
     __tablename__ = 'users'
     __table_args__ = (
         CheckConstraint('age >= 18', name='users_age_check'),
-        CheckConstraint("email::text ~ '^[A-Za-z0-9._%%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$'::text", name='users_email_check'),
+        CheckConstraint("email::text ~ '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$'::text", name='users_email_check'),
         CheckConstraint("phone::text ~ '^\\+7\\d{10}$'::text", name='users_phone_check'),
         ForeignKeyConstraint(['education_direction'], ['education_direction.id'], name='users_education_direction_fkey'),
         ForeignKeyConstraint(['ei_id'], ['educational_institution.id'], name='users_ei_id_fkey'),
@@ -180,6 +164,7 @@ class User(Base):
     about: Mapped[Optional[str]] = mapped_column(String(255))
     education_direction: Mapped[Optional[int]] = mapped_column(BigInteger)
     budget: Mapped[Optional[int]] = mapped_column(BigInteger)
+    gender: Mapped[Optional[int]] = mapped_column(SmallInteger)
 
     bad_habitss: Mapped[List['BadHabit']] = relationship('BadHabit', secondary='user_bad_habits', back_populates='users')
     interests: Mapped[List['Interest']] = relationship('Interest', secondary='user_interest', back_populates='users')
