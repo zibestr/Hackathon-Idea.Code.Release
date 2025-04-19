@@ -43,7 +43,7 @@ services:
     build: ./redis
     restart: always
     ports:
-      - "6777:6777"
+      - "6777:6379"
     volumes:
       - redis_data:/data
     environment:

@@ -6,6 +6,6 @@ VOLUME /data
 
 WORKDIR /data
 
-EXPOSE 6777
+EXPOSE 6379
 
 CMD ["redis-server", "/usr/local/etc/redis/redis.conf"]
