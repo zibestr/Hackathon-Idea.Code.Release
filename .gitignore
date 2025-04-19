@@ -9,3 +9,5 @@ scratch.py
 test.py
 *.ipynb
 model_orchestrator/app_sync.py
+logs
+poetry.lock

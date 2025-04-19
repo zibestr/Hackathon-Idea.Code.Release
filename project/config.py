@@ -6,8 +6,6 @@ load_dotenv(override=True)
 
 
 class Settings(BaseSettings):
-    port: int = 8100
-
     # Logging
     silent: bool = False
     log_path: str = '.logs'
@@ -33,10 +31,17 @@ class Settings(BaseSettings):
             'port': self.postgres_port
         }
 
+    # API
+    ml_api: str = ''
+    back_api: str = ''
+
+    # Encryption
+    secret_key: str = ''
+    encryption_algorithm: str = ''
+    access_token_expire_seconds: str = ''
+
     # Path
     data_path: str = '__data__'
 
 
 settings = Settings()
-
-print(settings.postgres_db_password)

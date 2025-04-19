@@ -5,16 +5,73 @@ from .connections import (
 )
 
 try:
-    from .models import *
-except ImportError:
+    from .models import (
+        BadHabit,
+        District,
+        EducationLevel,
+        Interest,
+        EducationDirection,
+        Region,
+        EducationalInstitution,
+        Locality,
+        User,
+        Habitation,
+        t_user_bad_habits,
+        t_user_interest,
+        UserPhoto,
+        UserResponse,
+        UserScore,
+        HabitationPhoto,
+        Match,
+        Message
+    )
+except (ModuleNotFoundError, ImportError) as e:
     import asyncio
-    asyncio.run(create_models('db/models.py'))
-    from .models import *
+    from pathlib import Path
+    asyncio.run(create_models(Path(__file__).parent / "models.py"))
+    from .models import (
+        BadHabit,
+        District,
+        EducationLevel,
+        Interest,
+        EducationDirection,
+        Region,
+        EducationalInstitution,
+        Locality,
+        User,
+        Habitation,
+        t_user_bad_habits,
+        t_user_interest,
+        UserPhoto,
+        UserResponse,
+        UserScore,
+        HabitationPhoto,
+        Match,
+        Message
+    )
 
-from queries import *
+from .queries import get_user_by_email
 
 __all__ = [
     'create_models',
     'init_db',
-    'get_session'
+    'get_session',
+    'BadHabit',
+    'District',
+    'EducationLevel',
+    'Interest',
+    'EducationDirection',
+    'Region',
+    'EducationalInstitution',
+    'Locality',
+    'User',
+    'Habitation',
+    't_user_bad_habits',
+    't_user_interest',
+    'UserPhoto',
+    'UserResponse',
+    'UserScore',
+    'HabitationPhoto',
+    'Match',
+    'Message'
 ]
