@@ -7,7 +7,7 @@
     <img src="../assets/main_image.png" class="image">
     <h1>The Neighborhood</h1>
     <p>Сервис поиска людей</p>
-    <button>Найти соседа</button>
+    <a>Найти соседа</a>
 </div>
 </template>
 
@@ -64,8 +64,12 @@ color: #000000;
 }
 
 
-.main button {
+.main a {
     position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
     width: 346px;
     height: 60px;
     left: 40px;
