@@ -1,4 +1,4 @@
-import redis
+import redis.asyncio as redis
 import json
 from sqlmodel import select, and_
 from typing import Optional, List, Dict, Any
@@ -203,14 +203,10 @@ async def update_habitation(habitation_id: int, new_name: str) -> Optional[Habit
         await session.refresh(habitation)
         return habitation
       
-
-def store_user_relation(hash_name: str, user_id: int, related_ids: list[int]) -> None:
-    # make async
+async def store_user_relation(hash_name: str, user_id: int, related_ids: list[int]) -> None:
     value = json.dumps(related_ids)
-    r.hset(hash_name, user_id, value)
+    await r.hset(hash_name, user_id, value)
 
-    
-def get_user_relation(hash_name: str, user_id: int) -> list[int]:
-      # make async
-    value = r.hget(hash_name, user_id)
+async def get_user_relation(hash_name: str, user_id: int) -> list[int]:
+    value = await r.hget(hash_name, user_id)
     return json.loads(value) if value else []
