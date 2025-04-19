@@ -9,6 +9,8 @@ from .schemas import (
     User,
     UserInDB
 )
+from .chat import router as chat_router
+from .image_save import save_image 
 
 __all__ = [
     'logs',
@@ -20,5 +22,7 @@ __all__ = [
     'Token',
     'TokenData',
     'User',
-    'UserInDB'
+    'UserInDB',
+    'chat_router',
+    'save_image'
 ]

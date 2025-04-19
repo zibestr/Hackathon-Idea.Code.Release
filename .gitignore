@@ -11,3 +11,6 @@ test.py
 model_orchestrator/app_sync.py
 logs
 poetry.lock
+
+#frontend
+frontend/node_modules

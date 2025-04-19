@@ -1,3 +1,5 @@
+import redis
+import json
 from sqlmodel import select, and_
 from typing import Optional, List, Dict, Any
 import random
@@ -29,6 +31,7 @@ from db import (
 #TODO приходит id (user листает ленту) -> если в user_response при request_user_id == user_id исключаем response_user_id из поиска, остальных пользователей
 #TODO для каждой пары json(user, searching_for user)
 # я кидаю дане запрос на получение кластера для нового пользователя и получаю кластер, записываю
+r = redis.Redis(host='localhost', port=6777, db=0, decode_responses=True)
 
 
 async def get_user_by_email(email: str) -> Optional[User]:
@@ -199,3 +202,15 @@ async def update_habitation(habitation_id: int, new_name: str) -> Optional[Habit
         await session.commit()
         await session.refresh(habitation)
         return habitation
+      
+
+def store_user_relation(hash_name: str, user_id: int, related_ids: list[int]) -> None:
+    # make async
+    value = json.dumps(related_ids)
+    r.hset(hash_name, user_id, value)
+
+    
+def get_user_relation(hash_name: str, user_id: int) -> list[int]:
+      # make async
+    value = r.hget(hash_name, user_id)
+    return json.loads(value) if value else []
