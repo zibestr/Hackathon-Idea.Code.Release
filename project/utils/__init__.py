@@ -15,6 +15,8 @@ __all__ = [
     # logging
     'logs',
     'setup_logger',
+    # image_save
+    'save_image',
     # schemas
     'ModelReadiness',
     'TextRequest',
@@ -24,6 +26,5 @@ __all__ = [
     'TokenData',
     'User',
     'UserInDB',
-    'chat_router',
-    'save_image'
+    'chat_router'
 ]

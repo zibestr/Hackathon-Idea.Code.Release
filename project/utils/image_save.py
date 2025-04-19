@@ -4,6 +4,7 @@ from io import BytesIO
 from PIL import Image
 import asyncio
 import aiofiles
+from typing import Optional
 from config import settings
 
 
@@ -17,7 +18,7 @@ async def _process_and_save_image(file_path: Path, base64_str: str):
         await image_file.write(buffer.getvalue())
 
 
-async def save_image(user_id: int, base64_str: str, category: str) -> str:
+async def save_image(user_id: int, base64_str: str, category: str) -> Optional[str]:
     user_dir = Path(settings.data_path) / str(user_id)
     user_dir.mkdir(parents=True, exist_ok=True)
 
@@ -32,7 +33,7 @@ async def save_image(user_id: int, base64_str: str, category: str) -> str:
             continue
 
     if len(existing_numbers) >= 3:
-        raise ValueError("У вас больше 3 изображений")
+        return
 
     next_number = max(existing_numbers, default=0) + 1
     filename = f"{user_id}_{category}_{next_number}.jpg"
