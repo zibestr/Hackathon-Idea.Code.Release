@@ -24,5 +24,5 @@ COPY main.py .
 COPY config.py .
 
 # Команда запуска FastAPI через Uvicorn
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8100"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8100", "--reload"]
 
