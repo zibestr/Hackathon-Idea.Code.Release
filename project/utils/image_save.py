@@ -4,7 +4,7 @@ from io import BytesIO
 from PIL import Image
 import asyncio
 import aiofiles
-from typing import Optional
+from typing import Optional, Literal
 from config import settings
 
 
@@ -18,31 +18,24 @@ async def _process_and_save_image(file_path: Path, base64_str: str):
         await image_file.write(buffer.getvalue())
 
 
-async def save_image(user_id: int, base64_str: str, category: str) -> Optional[str]:
+async def save_image(user_id: int,
+                     base64_str: str,
+                     category: Literal['profile', 'habitation']) -> Optional[str]:
     user_dir = Path(settings.data_path) / str(user_id)
     user_dir.mkdir(parents=True, exist_ok=True)
 
     existing_files = list(user_dir.glob(f"{user_id}_{category}_*.jpg"))
-    existing_numbers = []
-
-    for f in existing_files:
-        try:
-            num_part = f.stem.split("_")[-1]
-            existing_numbers.append(int(num_part))
-        except ValueError:
-            continue
-
     if len(existing_numbers) >= 3:
         return
+    
+    existing_numbers = [
+            int(f.stem.split("_")[-1]) 
+            for f in existing_files
+            if f.stem.split("_")[-1].isdigit()
+    ]
 
-    next_number = max(existing_numbers, default=0) + 1
+    next_number = max(existing_numbers, default = 0) + 1
     filename = f"{user_id}_{category}_{next_number}.jpg"
     file_path = user_dir / filename
-
-    try:
-        loop = asyncio.get_running_loop()
-        await loop.run_in_executor(None, _process_and_save_image, file_path, base64_str)
-    except Exception as e:
-        raise ValueError(f"Ошибка при обработке изображения: {e}")
-
+    await asyncio.to_thread(_process_and_save_image, file_path, base64_str)
     return str(file_path)
