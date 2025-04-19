@@ -121,7 +121,7 @@ async def cache_recomendations(user_id: int):
     return recommendations
 
 
-async def write_opinion(user_id_req: int, user_id_rep: int, opinion: bool) -> Optional[Match]:
+async def write_opinion(user_id_req: int, user_id_rep: int, opinion: bool) -> Tuple[bool, Optional[Match]]:
     async with get_session() as session:
         # Проверка на взаимный лайк
         mutual_like_query = select(UserResponse).where(
@@ -134,7 +134,7 @@ async def write_opinion(user_id_req: int, user_id_rep: int, opinion: bool) -> Op
         mutual_like_result = await session.exec(mutual_like_query)
         is_mutual = mutual_like_result.first()
 
-        # Запись реакции пользователя
+        # Сохраняем реакцию пользователя
         response = UserResponse(
             request_user_id=user_id_req,
             response_user_id=user_id_rep,
@@ -151,9 +151,9 @@ async def write_opinion(user_id_req: int, user_id_rep: int, opinion: bool) -> Op
             )
             session.add(match)
             await session.commit()
-            return match
+            return True, match
 
-        return None
+        return False, None
 
 async def get_matches(user_id: int) -> List[Dict[str, Any]]:
     async with get_session() as session:

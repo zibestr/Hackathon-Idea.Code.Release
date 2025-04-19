@@ -1,8 +1,10 @@
 import uvicorn
 from typing import AsyncGenerator
-from fastapi import FastAPI, Request, HTTPException, Depends, status
+from fastapi import FastAPI, Request, HTTPException, Depends, status, WebSocket, WebSocketDisconnect
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.responses import JSONResponse
+from db.queries import write_opinion
+from chat import ConnectionManager
 from contextlib import asynccontextmanager
 from typing import Dict
 import uuid
@@ -36,30 +38,6 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 app = FastAPI(lifespan=lifespan)
 
 
-class ConnectionManager:
-    def __init__(self):
-        self.active_connections: Dict[str, WebSocket] = {}
-        self.usernames: Dict[str, str] = {}  # {user_id: username}
-
-    async def connect(self, websocket: WebSocket, user_id: str):
-        await websocket.accept()
-        self.active_connections[user_id] = websocket
-
-    async def register_user(self, user_id: str, username: str):
-        self.usernames[user_id] = username
-        print("{} Онлайн".format(username))
-
-    async def disconnect(self, user_id: str):
-        if user_id in self.usernames:
-            username = self.usernames[user_id]
-            del self.active_connections[user_id]
-            del self.usernames[user_id]
-            print("{} не онлайн".format(username))
-
-    async def broadcast(self, message: str):
-        for connection in self.active_connections.values():
-            await connection.send_text(message)
-
 manager = ConnectionManager()
 
 
@@ -80,6 +58,27 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 @app.get("me/", response_model=User)
 async def read_users_me(current_user: User = Depends(get_current_active_user)):
     return current_user
+
+
+@app.websocket("/chat/{user_id_req}/{user_id_rep}/{opinion}")
+async def chat(websocket: WebSocket, user_id_req: int, user_id_rep: int, opinion: bool):
+    # Используем write_opinion как проверку
+    matched, match = await write_opinion(user_id_req, user_id_rep, opinion)
+
+    if not matched:
+        # Если нет match — закрываем соединение
+        await websocket.close(code=1008)  # Policy Violation
+        return
+
+    # Если есть Match — подключаем к чату
+    await manager.connect(websocket, user_id_req, user_id_rep)
+
+    try:
+        while True:
+            data = await websocket.receive_text()
+            await manager.send_personal_message(user_id_req, user_id_rep, data)
+    except WebSocketDisconnect:
+        manager.disconnect(user_id_req, user_id_rep)
 
 
 @logs
