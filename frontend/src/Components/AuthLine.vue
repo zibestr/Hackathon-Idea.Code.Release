@@ -1,5 +1,7 @@
-<script>
+<script setup>
+import { LineStore } from '../stores/LineStates'
 
+const store = LineStore();
 </script>
 
 <template>
@@ -9,8 +11,8 @@
     <div class="point">
         <p>1</p>
     </div>
-    <div class="empty_line">
-    </div>
+    <div v-if="store.auth_line.auth_second_line == true" class="full_line"></div>
+    <div v-else class="empty_line"></div>
 </div>
 </template>
 
