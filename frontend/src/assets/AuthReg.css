@@ -1,7 +1,20 @@
+* {
+    margin: 0px;
+    padding: 0px;
+}
+
 h2 {
     margin-top: 34px;
     font-size: 48px;
     font-family: 'Mulish';
+}
+
+h3 {
+    font-size: 28px;
+    font-family: 'Mulish';
+    color: #000000;
+
+    margin-bottom: 5px;
 }
 
 input {
@@ -45,6 +58,7 @@ input {
     font-size: 24px;
     font-family: 'Mulish';
     font-weight: 700;
+    text-decoration: none;
 
     display: flex;
     justify-content: center;
@@ -67,9 +81,40 @@ input {
     margin-right: 21px;
 }
 
+.to_reg a {
+    font-family: 'Mulish';
+    font-size: 16px;
+    text-decoration: none;
+    color: #000000;
+}
+
 .strelka_div {
     position: relative;
     left: 59px;
     top: 16px;
     width: 60px;
+    height: 60px;
 }
+
+.strelka_div a {
+    width: 60px;
+    height: 60px;
+}
+
+.line {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    height: 100px;
+}
+
+.anket_input_div {
+    margin-top: 30px;
+}
+
+.anket_input_div input {
+    margin-top: 6px;
+    height: 40px;
+}
+
