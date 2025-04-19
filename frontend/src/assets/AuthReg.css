@@ -1,0 +1,75 @@
+h2 {
+    margin-top: 34px;
+    font-size: 48px;
+    font-family: 'Mulish';
+}
+
+input {
+    width: 510px;
+    height: 45px;
+    border: 1px solid #000000;
+    border-radius: 35px;
+    margin-top: 30px;
+    padding-left: 15px;
+    padding-right: 15px;
+
+    font-size: 18px;
+    font-family: 'Mulish';
+    color: #000000;
+}
+
+.head_div {
+    width: 100%;
+    text-align: center;
+    display: inline-block;
+}
+
+.input_div {
+    margin-top: 30px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+
+.authreg_button {
+    width: 348px;
+    height: 60px;
+    background-color: #FF5E37;
+    color: #000000;
+    border-radius: 45px;
+    margin-top: 60px;
+
+    font-size: 24px;
+    font-family: 'Mulish';
+    font-weight: 700;
+
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.to_reg {
+    flex-direction: row;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-family: 'Mulish';
+    font-size: 16px;
+    margin-top: 20px;
+}
+
+.to_reg p {
+    margin-right: 21px;
+}
+
+.strelka_div {
+    position: relative;
+    left: 59px;
+    top: 16px;
+    width: 60px;
+}
