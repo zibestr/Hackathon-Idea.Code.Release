@@ -17,3 +17,6 @@ WORKDIR /app
 
 COPY app.py .
 COPY rubert-tiny-toxicity ./rubert-tiny-toxicity
+COPY user-ranking ./user-ranking
+COPY nsfw-detector ./nsfw-detector
+COPY schemas.py .

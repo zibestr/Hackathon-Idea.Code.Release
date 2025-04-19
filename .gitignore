@@ -6,6 +6,6 @@
 .env
 .pytest_cache
 scratch.py
-poetry.lock
-*.log
-logs
+test.py
+*.ipynb
+model_orchestrator/app_sync.py

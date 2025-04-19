@@ -1,19 +1,18 @@
-CREATE SEQUENCE user_id_seq;
-CREATE SEQUENCE locality_id_seq;
-CREATE SEQUENCE locality_type_id_seq;
-CREATE SEQUENCE region_id_seq;
-CREATE SEQUENCE district_id_seq;
-CREATE SEQUENCE educational_institution_id_seq;
-CREATE SEQUENCE education_level_id_seq;
-CREATE SEQUENCE education_direction_id_seq;
-CREATE SEQUENCE habitation_id_seq;
-CREATE SEQUENCE user_photo_id_seq;
-CREATE SEQUENCE habitation_photo_id_seq;
-CREATE SEQUENCE match_id_seq;
-CREATE SEQUENCE message_id_seq;
-CREATE SEQUENCE bad_habits_id_seq;
-CREATE SEQUENCE interest_id_seq;
-CREATE SEQUENCE user_response_id_seq;
+CREATE SEQUENCE user_id_seq START WITH 1;
+CREATE SEQUENCE locality_id_seq START WITH 1;
+CREATE SEQUENCE region_id_seq START WITH 1;
+CREATE SEQUENCE district_id_seq START WITH 1;
+CREATE SEQUENCE educational_institution_id_seq START WITH 1;
+CREATE SEQUENCE education_level_id_seq START WITH 1;
+CREATE SEQUENCE education_direction_id_seq START WITH 1;
+CREATE SEQUENCE habitation_id_seq START WITH 1;
+CREATE SEQUENCE user_photo_id_seq START WITH 1;
+CREATE SEQUENCE habitation_photo_id_seq START WITH 1;
+CREATE SEQUENCE match_id_seq START WITH 1;
+CREATE SEQUENCE message_id_seq START WITH 1;
+CREATE SEQUENCE bad_habits_id_seq START WITH 1;
+CREATE SEQUENCE interest_id_seq START WITH 1;
+CREATE SEQUENCE user_response_id_seq START WITH 1;
 
 CREATE TABLE IF NOT EXISTS bad_habits (
 	id bigint NOT NULL UNIQUE DEFAULT nextval('bad_habits_id_seq'),
@@ -29,22 +28,16 @@ CREATE TABLE IF NOT EXISTS interest (
 
 CREATE TABLE IF NOT EXISTS district (
 	id bigint NOT NULL UNIQUE DEFAULT nextval('district_id_seq'),
-	name varchar(255) NOT NULL,
+	title varchar(255) NOT NULL,
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE IF NOT EXISTS region (
 	id bigint NOT NULL UNIQUE DEFAULT nextval('region_id_seq'),
-	name varchar(255) NOT NULL,
+	title varchar(255) NOT NULL,
 	district_id bigint NOT NULL,
 	PRIMARY KEY (id),
 	FOREIGN KEY (district_id) REFERENCES district(id)
-);
-
-CREATE TABLE IF NOT EXISTS locality_type (
-	id bigint NOT NULL UNIQUE DEFAULT nextval('locality_type_id_seq'),
-	name varchar(255) NOT NULL,
-	PRIMARY KEY (id)
 );
 
 CREATE TABLE IF NOT EXISTS education_level (
@@ -55,11 +48,9 @@ CREATE TABLE IF NOT EXISTS education_level (
 
 CREATE TABLE IF NOT EXISTS locality (
 	id bigint NOT NULL UNIQUE DEFAULT nextval('locality_id_seq'),
-	type_id bigint NOT NULL,
 	region_id bigint NOT NULL,
 	name varchar(255) NOT NULL,
 	PRIMARY KEY (id),
-	FOREIGN KEY (type_id) REFERENCES locality_type(id),
 	FOREIGN KEY (region_id) REFERENCES region(id)
 );
 
@@ -102,6 +93,7 @@ CREATE TABLE IF NOT EXISTS users (
 	last_log_moment timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	rating double precision NOT NULL DEFAULT 5,
 	budget bigint,
+	gender smallint,
 	PRIMARY KEY (id),
 	FOREIGN KEY (ei_id) REFERENCES educational_institution(id),
 	FOREIGN KEY (locality_id) REFERENCES locality(id),
@@ -197,8 +189,6 @@ CREATE UNIQUE INDEX user_phone_idx ON users(phone);
 CREATE UNIQUE INDEX user_vk_id_idx ON users(vk_id);
 
 CREATE UNIQUE INDEX locality_id_idx ON locality(id);
-
-CREATE UNIQUE INDEX locality_type_id_idx ON locality_type(id);
 
 CREATE UNIQUE INDEX region_id_idx ON region(id);
 
