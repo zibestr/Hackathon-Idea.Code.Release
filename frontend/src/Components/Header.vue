@@ -1,6 +1,8 @@
-<script>
+<script setup>
 import "@fontsource/mulish";
-import router from "../router";
+import { LineStore } from "../stores/LineStates";
+
+const store = LineStore()
 </script>
 
 <template>
@@ -14,7 +16,7 @@ import router from "../router";
         </div>
     </div>
     <div class="input_button">
-        <a href="/auth">Войти</a>
+        <a href="/auth" @click="store.change_auth_value(false)">Войти</a>
     </div>
 </div>
 </template>

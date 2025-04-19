@@ -1,5 +1,7 @@
-<script>
+<script setup>
+import { LineStore } from '../stores/LineStates';
 
+const store = LineStore()
 </script>
 
 <template>
@@ -7,7 +9,7 @@
     <img src="../assets/main_image.png" class="image">
     <h1>The Neighborhood</h1>
     <p>Сервис поиска людей</p>
-    <a>Найти соседа</a>
+    <a href="/auth" @click="store.change_auth_value(false)">Найти соседа</a>
 </div>
 </template>
 
@@ -83,6 +85,7 @@ color: #000000;
     font-weight: 700;
     font-size: 24px;
     line-height: 30px;
+    text-decoration: none;
 
 color: #000000;
 
