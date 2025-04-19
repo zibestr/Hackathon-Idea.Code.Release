@@ -6,7 +6,6 @@
 .env
 .pytest_cache
 scratch.py
-test.py
 poetry.lock
 *.log
 logs
