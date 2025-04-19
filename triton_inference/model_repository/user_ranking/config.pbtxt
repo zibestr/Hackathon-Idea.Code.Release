@@ -4,16 +4,31 @@ max_batch_size: 0
 
 input [
   {
-    name: "input_features"
-    data_type: TYPE_FP16
-    dims: [ -1, 64 ]
+    name: "num_input"
+    data_type: TYPE_FP32
+    dims: [ -1, 10 ]
+  },
+  {
+    name: "cat_input"
+    data_type: TYPE_INT64
+    dims: [ -1, 4 ]
+  },
+  {
+    name: "habits_input"
+    data_type: TYPE_INT64
+    dims: [ -1, 2, 50 ]
+  },
+    {
+    name: "interest_input"
+    data_type: TYPE_INT64
+    dims: [ -1, 2, 50 ]
   }
 ]
 
 output [
   {
     name: "output"
-    data_type: TYPE_FP16
+    data_type: TYPE_FP32
     dims: [ -1, 1 ]
   }
 ]
