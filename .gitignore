@@ -1,8 +1,8 @@
 *.pdf
 .venv
-__pycache__
-.mypy_cache
-.DS_Store
+*__pycache__
+*.mypy_cache
+*.DS_Store
 .env
 .pytest_cache
 scratch.py
