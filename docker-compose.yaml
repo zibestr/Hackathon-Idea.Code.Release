@@ -39,8 +39,21 @@ services:
       networks:
         - project-net
 
+  redis:
+    build: ./redis
+    restart: always
+    ports:
+      - "6777:6777"
+    volumes:
+      - redis_data:/data
+    environment:
+      - REDIS_PASSWORD=Zahodim!!
+    networks:
+      - project-net
+
 networks:
   project-net:
 
 volumes:
   postgres_data:
+  redis_data:
