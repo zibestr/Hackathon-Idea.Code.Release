@@ -1,4 +1,4 @@
-// import './assets/main.css'
+import './assets/AuthReg.css'
 
 import { createApp } from 'vue'
 import App from './App.vue'

@@ -1,5 +1,6 @@
 <script>
 import "@fontsource/mulish";
+import router from "../router";
 </script>
 
 <template>
@@ -13,7 +14,7 @@ import "@fontsource/mulish";
         </div>
     </div>
     <div class="input_button">
-        <button>Войти</button>
+        <a href="/auth">Войти</a>
     </div>
 </div>
 </template>
@@ -69,18 +70,21 @@ color: #000000;
     right: 40px;
 }
 
-.input_button button {
+.input_button a {
     width: 130px;
     height: 34px;
     border: 1px solid #000000;
     border-radius: 45px;
-    gap: 10px;
-
+    text-align: center;
+    text-decoration: none;
     font-family: 'Mulish';
     font-style: normal;
     font-weight: 400;
     font-size: 20px;
     line-height: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
 color: #000000;
 }
