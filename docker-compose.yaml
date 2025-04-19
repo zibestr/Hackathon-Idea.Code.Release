@@ -55,7 +55,7 @@ services:
     build: 
       context: ./frontend
     ports:
-      - "8777:80"
+      - "80:80"
     networks:
       - project-net
     volumes:
