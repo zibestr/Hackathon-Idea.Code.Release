@@ -1,12 +1,12 @@
 *.pdf
-*.venv
+.venv
 *__pycache__
 *.mypy_cache
 *.DS_Store
 .env
-*.pytest_cache
+.pytest_cache
 scratch.py
 test.py
 poetry.lock
 *.log
-*logs
+logs
