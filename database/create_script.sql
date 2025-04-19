@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS educational_institution (
 
 CREATE TABLE IF NOT EXISTS education_direction (
 	id bigint NOT NULL UNIQUE DEFAULT nextval('education_direction_id_seq'),
-	code varchar (10) NOT NULL CHECK (code ~ '^\d\.\d\d\.\d\d\.\d\d$'),
+	code varchar (8) NOT NULL CHECK (code ~ '^\d\d\.\d\d\.\d\d$'),
 	title varchar(255) NOT NULL,
 	education_level_id bigint NOT NULL,
 	PRIMARY KEY (id),
