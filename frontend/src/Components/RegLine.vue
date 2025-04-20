@@ -1,4 +1,7 @@
-<script>
+<script setup>
+import { LineStore } from '../stores/LineStates';
+
+const store = LineStore();
 
 </script>
 
@@ -9,12 +12,15 @@
     <div class="point">
         <p>1</p>
     </div>
-    <div class="empty_line">
+    <div v-if="store.reg_line.reg_second_line == true" class="full_line">
+    </div>
+    <div v-else class="empty_line">
     </div>
     <div class="point">
         <p>2</p>
     </div>
-    <div class="empty_line"></div>
+    <div v-if="store.reg_line.reg_third_line == true" class="full_line"></div>
+    <div v-else class="empty_line"></div>
 </div>
 </template>
 

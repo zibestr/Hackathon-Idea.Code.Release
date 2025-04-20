@@ -1,4 +1,8 @@
-<script>
+<script setup>
+import { LineStore } from '../stores/LineStates';
+
+const store = LineStore();
+
 
 </script>
 
@@ -12,7 +16,7 @@
     <input class="auth_input" placeholder="Логин">
     <input class="auth_input" placeholder="Пароль">
     <input class="auth_input" placeholder="Повтор пароля">
-    <a class="authreg_button" href="/createanket">Зарегистрироваться</a>
+    <a class="authreg_button" href="/createanket" @click="store.change_value('reg_second_line', true)">Зарегистрироваться</a>
     <div class="to_reg">
         <a href="/auth">Вход</a>
     </div>

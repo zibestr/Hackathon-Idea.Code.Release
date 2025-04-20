@@ -1,9 +1,13 @@
 import uvicorn
-from typing import AsyncGenerator
-from fastapi import FastAPI, Request, HTTPException, Depends, status
+from fastapi import FastAPI, Request, HTTPException, Depends, status, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
+from fastapi.security import OAuth2PasswordRequestForm
+from db.queries import write_opinion, get_regions, get_cities_by_region_name, get_bad_habits, get_interests, get_educ_dir
+from chat import ConnectionManager
+from typing import Dict, List, AsyncGenerator
+import uuid
 
 from config import settings
 from db import init_db
@@ -42,7 +46,6 @@ app = FastAPI(
     openapi_url="/api/openapi.json"
 )
 
-
 app.add_middleware(
     CORSMiddleware,
     #allow_origins=settings.allowed_origins,
@@ -53,6 +56,50 @@ app.add_middleware(
 
 app.include_router(auth_router, prefix="/api")
 app.include_router(chat_router, prefix="/api/chat", tags=["chat"])
+
+
+@app.get("/get_regions", response_model=List[str])
+async def get_all_regions():
+    return get_regions()
+    
+
+@app.get("/get_regions/{region_title}/cities", response_model=List[str])
+async def get_cities_by_region(region_title: str):
+    return get_cities_by_region_name(region_title)
+
+
+
+@app.get("/get_bad_habits", response_model=List[str])
+async def get_all_bad_habits():
+    return get_bad_habits()
+
+@app.get("/get_interests", response_model=List[str])
+async def get_all_interests():
+    return get_all_interests()
+
+@app.get("/get_educ_dir", response_model=List[str])
+async def get_all_educ_dir():
+    return get_educ_dir()
+
+@app.websocket("/chat/{user_id_req}/{user_id_rep}/{opinion}")
+async def chat(websocket: WebSocket, user_id_req: int, user_id_rep: int, opinion: bool):
+    # Используем write_opinion как проверку
+    matched, match = await write_opinion(user_id_req, user_id_rep, opinion)
+
+    if not matched:
+        # Если нет match — закрываем соединение
+        await websocket.close(code=1008)  # Policy Violation
+        return
+
+    # Если есть Match — подключаем к чату
+    await manager.connect(websocket, user_id_req, user_id_rep)
+
+    try:
+        while True:
+            data = await websocket.receive_text()
+            await manager.send_personal_message(user_id_req, user_id_rep, data)
+    except WebSocketDisconnect:
+        manager.disconnect(user_id_req, user_id_rep)
 
 
 @logs
