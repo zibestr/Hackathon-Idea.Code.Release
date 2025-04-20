@@ -1,7 +1,7 @@
 import redis.asyncio as redis
 import json
 import requests
-from sqlmodel import select, and_, or_, alias, func
+from sqlmodel import select, and_, or_, alias, func, distinct
 from typing import Optional, List, Dict, Any
 import random
 from config import settings
@@ -296,6 +296,7 @@ async def get_habitation() -> List[Habitation]:
         result = await session.exec(select(Habitation))
         return result.all()
 
+
 async def create_habitation(name: str) -> Habitation:
     async for session in get_session():
         habitation = Habitation(name=name)
@@ -303,6 +304,7 @@ async def create_habitation(name: str) -> Habitation:
         await session.commit()
         await session.refresh(habitation)
         return habitation
+
 
 async def update_habitation(habitation_id: int, new_name: str) -> Optional[Habitation]:
     async for session in get_session():
@@ -329,11 +331,38 @@ async def get_matches(user_id: int):
 
 
 async def get_all_matches():
-    async with get_session() as session:
-        all_user_matches = await session.exec(
+    # Создаем CTE для всех пар (прямых и обратных)
+    with get_session() as session:
+        all_pairs = (
+            select(
+                UserResponse.request_user_id.label('request_id'),
+                UserResponse.response_user_id.label('response_id')
+            )
+            .select_from(Match)
+            .join(UserResponse, UserResponse.id == Match.response_id)
+            
+            .union_all(
+                select(
+                    UserResponse.user_response_id.label('request_id'),
+                    UserResponse.user_request_id.label('response_id')
+                )
+                .select_from(Match)
+                .join(UserResponse, UserResponse.id == Match.response_id)
+            )
+        ).cte('all_pairs')
 
+        # Основной запрос с группировкой
+        final_query = (
+            select(
+                all_pairs.c.request_id,
+                func.array_agg(distinct(all_pairs.c.response_id)).label('matched_responses')
+            )
+            .group_by(all_pairs.c.request_id)
         )
-        return all_user_matches.all()
+
+        # Выполнение запроса
+        result = session.execute(final_query).all()
+        return result
       
 
 async def store_user_relation(hash_name: str, user_id: int, related_ids: list[int]) -> None:
