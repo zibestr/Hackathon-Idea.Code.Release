@@ -35,4 +35,8 @@
     margin: 10px;
     margin-bottom: 20px;
 }
+
+.home_info p {
+    font-size: 28px;
+}
 </style>
