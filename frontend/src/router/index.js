@@ -5,6 +5,7 @@ import Regestration from '../views/Regestration.vue'
 import Anket from '../views/Ankets.vue'
 import Profile from '../views/Profile.vue'
 import Recomendations from '../views/Recomendations.vue'
+import Matches from '../views/Matches.vue'
 
 const routes = [
   { path: '/', component: Home },
@@ -12,7 +13,8 @@ const routes = [
   { path: '/regestration', component: Regestration},
   { path: '/createanket', component: Anket},
   { path: '/profile', component: Profile},
-  { path: '/recomendations', component: Recomendations}
+  { path: '/recomendations', component: Recomendations},
+  { path: '/matches', component: Matches}
 
 ]
 

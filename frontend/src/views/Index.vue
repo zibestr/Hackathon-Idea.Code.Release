@@ -45,6 +45,7 @@ const store = LineStore()
     position: relative;
     top: 79px;
     left: 40px;
+    display: inline;
 
 color: #000000;
 }
