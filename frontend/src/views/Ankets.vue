@@ -17,37 +17,30 @@ import InstitutList from '../Components/Lists/InstitutList.vue'
 import { LineStore } from '../stores/LineStates'
 
 const store = LineStore();
-</script>
 
-<script>
-export default {
-    data() {
-        return {
-            age: "",
-        }
-    },
-    methods: {
-        ClickPlusButton() {
-            if (this.age == "" || this.age <= 0) {
-                this.age = 1;
-            }
-            else {
-                this.age = Number(this.age) + 1;
-            }
-        },
-        ClicMinusButton() {
-            if (this.age == "") {
-                this.age = 150;
-            }
-            else if (this.age > 0 && this.age <= 150) {
-                this.age = Number(this.age) - 1;
-            }
-            else {
-                this.age = 150;
-            }
-        }
+import { ref } from 'vue';
+const age = ref(0);
+
+const ClickPlusButton = () => {
+    if (age.value == "" || age.value <= 0) {
+        age.value = 1;
     }
-}
+    else {
+        age.value = Number(age.value) + 1;
+    }
+};
+
+const ClicMinusButton = () => {
+    if (age.value == "") {
+        age.value = 150;
+    }
+    else if (age.value > 0 && age.value <= 150) {
+        age.value = Number(age.value) - 1;
+    }
+    else {
+        age.value = 150;
+    }
+};
 </script>
 
 <template>
@@ -69,7 +62,7 @@ export default {
             <div class="age_input_div">
             <button class="sign_minus" @click="ClicMinusButton">-</button>
                 <input v-model="age" type="number" placeholder="Возраст" class="age_input">
-                <button class="sign_plus" @click="ClickPlusButton()">+</button>
+                <button class="sign_plus" @click="ClickPlusButton">+</button>
             </div>
         </div>
         <div class="vk_id_div">
