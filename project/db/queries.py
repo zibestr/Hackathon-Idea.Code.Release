@@ -54,6 +54,41 @@ async def create_user(fields: Dict[str, Any]) -> User:
         return user
 
 
+async def getregions():
+    async with get_session() as session:
+        result = await session.exec(select(Region.title))
+        return result.all()
+
+
+async def get_cities_by_region_name(region_title: str):
+    async with get_session() as session:
+        region_result = await session.exec(select(Region).where(Region.title == region_title))
+        region = region_result.first()
+
+        if not region:
+            raise HTTPException(status_code=404, detail="Регион не найден")
+
+        cities_result = await session.exec(
+            select(Locality.name).where(Locality.region_id == region.id)
+        )
+        return cities_result.all()
+
+async def get_bad_habits():
+    async with get_session() as session:
+        result = await session.exec(select(BadHabit.title))
+        return result.all()
+
+async def get_interests():
+    async with get_session() as session:
+        result = await session.exec(select(Interest.title))
+        return result.all()
+
+
+async def get_educ_dir():
+    async with get_session() as session:
+        result = await session.exec(select(EducationDirection.code))
+        return result.all()
+
 async def update_user(user_id: int, update_data: Dict[str, Any]) -> Optional[User]:
     # danya model
     async with get_session() as session:

@@ -3,7 +3,7 @@ from typing import AsyncGenerator
 from fastapi import FastAPI, Request, HTTPException, Depends, status, WebSocket, WebSocketDisconnect
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.responses import JSONResponse
-from db.queries import write_opinion
+from db.queries import write_opinion, get_regions, get_cities_by_region_name, get_bad_habits, get_interests, get_educ_dir
 from chat import ConnectionManager
 from contextlib import asynccontextmanager
 from typing import Dict, List
@@ -60,27 +60,28 @@ async def read_users_me(current_user: User = Depends(get_current_active_user)):
     return current_user
 
 
-@app.get("/regions", response_model=List[str])
+@app.get("/get_regions", response_model=List[str])
 async def get_all_regions():
-    async with get_session() as session:
-        result = await session.exec(select(Region.title))
-        return result.all()
+    return get_regions()
     
 
-@app.get("/regions/{region_title}/cities", response_model=List[str])
+@app.get("/get_regions/{region_title}/cities", response_model=List[str])
 async def get_cities_by_region(region_title: str):
-    async with get_session() as session:
-        region_result = await session.exec(select(Region).where(Region.title == region_title))
-        region = region_result.first()
+    return get_cities_by_region_name(region_title)
 
-        if not region:
-            raise HTTPException(status_code=404, detail="Регион не найден")
 
-        cities_result = await session.exec(
-            select(Locality.name).where(Locality.region_id == region.id)
-        )
-        return cities_result.all()
 
+@app.get("/get_bad_habits", response_model=List[str])
+async def get_all_bad_habits():
+    return get_bad_habits()
+
+@app.get("/get_interests", response_model=List[str])
+async def get_all_interests():
+    return get_all_interests()
+
+@app.get("/get_educ_dir", response_model=List[str])
+async def get_all_educ_dir():
+    return get_educ_dir()
 
 @app.websocket("/chat/{user_id_req}/{user_id_rep}/{opinion}")
 async def chat(websocket: WebSocket, user_id_req: int, user_id_rep: int, opinion: bool):
