@@ -34,6 +34,8 @@ class Settings(BaseSettings):
     # API
     ml_api: str = ''
     back_api: str = ''
+    redis: str = ''
+    allowed_origins: list[str] = ['']
 
     # Encryption
     secret_key: str = ''

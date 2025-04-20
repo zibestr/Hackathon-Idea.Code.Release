@@ -51,7 +51,9 @@ except (ModuleNotFoundError, ImportError) as e:
     )
 
 from .queries import (
-    get_user_by_email
+    get_user_by_email,
+    create_user,
+    get_matches
 )
 
 __all__ = [
@@ -80,4 +82,6 @@ __all__ = [
     'Message',
     # queries
     'get_user_by_email',
+    'create_user',
+    'get_matches'
 ]

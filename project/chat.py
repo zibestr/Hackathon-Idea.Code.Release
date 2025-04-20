@@ -1,5 +1,6 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from typing import Dict, Tuple
+from db import get_matches
 
 router = APIRouter()
 
@@ -23,6 +24,11 @@ class ConnectionManager:
         return tuple(sorted([user1, user2]))
 
     async def connect(self, websocket: WebSocket, user_id: int, target_id: int):
+        matches = await get_matches(user_id)
+        if target_id not in matches:
+            await websocket.close(code=4003, reason="No match between users")
+            return
+
         await websocket.accept()
         key = self._get_chat_key(user_id, target_id)
         if key not in self.active_connections:
@@ -41,6 +47,20 @@ class ConnectionManager:
         connections = self.active_connections.get(key, {})
         for uid, conn in connections.items():
             await conn.send_text(f"{sender_id}: {message}")
+
+    async def get_user_active_connections(self, user_id: int):
+        matches = await get_matches(user_id)
+        active_chats = []
+        
+        for match_id in matches:
+            key = self._get_chat_key(user_id, match_id)
+            if key in self.active_connections and user_id in self.active_connections[key]:
+                active_chats.append({
+                    "target_id": match_id,
+                    "connection": self.active_connections[key][user_id]
+                })
+        
+        return active_chats
 
 
 manager = ConnectionManager()
