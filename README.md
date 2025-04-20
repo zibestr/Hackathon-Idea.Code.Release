@@ -34,3 +34,29 @@
 ```ls -l /var/run/docker.sock```
 
 Should show your username as owner if comands were executed correctly.
+
+
+
+{
+  "name": "sasha",
+  "photos": [
+  ],
+  "gender": 0,
+  "age": 52,
+  "email": "aligos@yandex.ru",
+  "phone": "+79897088242",
+  "vk_id": "777",
+  "region_name": "г. Москва",
+  "locality_name": "г. Москва",
+  "education_direction": "09.03.04",
+  "educational_institution": "РТУ МИРЭА",
+  "habits": [
+    "Курение в помещении", "Частые жалобы"
+  ],
+  "interests": [
+    "Создание косплея", "Йога"
+  ],
+  "budget": null,
+  "about": "Я ЛЮБЛЮ МУЖЧИН",
+  "hashed_password": "qwerty"
+}

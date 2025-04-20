@@ -66,8 +66,9 @@ async def get_user_by_email(email: str) -> Optional[User]:
 
 async def create_user(user: UserAuth) -> Optional[User]:
     data = user.about
-    ml_api_toxicity_state: ModelReadiness = requests.get(f'{settings.ml_api}/check_model_toxicity')
-    if data != '' and ml_api_toxicity_state.ready:
+    ml_api_toxicity_state = requests.get(f'{settings.ml_api}/check_model_toxicity')
+    print(ml_api_toxicity_state.text)
+    if data != '' and json.loads(ml_api_toxicity_state.text)['ready']:
         payload = dict(text=data)
         response = requests.post(f'{settings.ml_api}/predict_toxicity', data=payload)
         if response.status_code == 200:
@@ -75,7 +76,7 @@ async def create_user(user: UserAuth) -> Optional[User]:
                 return
 
     async with get_session() as session:
-        locality_id = await session.exec(
+        locality_id = (await session.exec(
             select(Locality.id)
             .join(Region)
             .where(
@@ -84,45 +85,45 @@ async def create_user(user: UserAuth) -> Optional[User]:
                     Region.title == user.region_name
                 )
             )
-        )
+        )).first()
 
-        ei_id = await session.exec(
+        ei_id = (await session.exec(
             select(EducationalInstitution.id)
             .where(EducationalInstitution.short_name == user.educational_institution)
-        )
+        )).first()
         
-        ed_dir_id = await session.exec(
+        ed_dir_id = (await session.exec(
             select(EducationDirection.id)
             .where(EducationDirection.title == user.education_direction)
-        )
+        )).first()
         
-        user = User(
+        user_entity = User(
             name=user.name,
             age=user.age,
             email=user.email,
             phone=user.phone,
             vk_id=user.vk_id,
             about=user.about,
-            locality_id=locality_id.first(),
+            locality_id=locality_id,
             password_hash=user.hashed_password,
-            education_direction=ed_dir_id.first() if ed_dir_id.first() else None,
-            ei_id=ei_id.first() if ei_id.first() else None,
+            education_direction=ed_dir_id,
+            ei_id=ei_id,
             budget=user.budget,
             gender=user.gender
         )
 
-        session.add(user)
+        session.add(user_entity)
         await session.flush()
         
         for photo in enumerate(user.photos):
             photo_filename = await save_image(
-                user.id,
+                user_entity.id,
                 photo,
                 category='profile'
             )
             
             photo = UserPhoto(
-                user_id=user.id,
+                user_id=user_entity.id,
                 file_name=photo_filename,
             )
             session.add(photo)
@@ -137,7 +138,7 @@ async def create_user(user: UserAuth) -> Optional[User]:
             habit_ids = habits.all()
             for habit_id in habit_ids:
                 user_habit = t_user_bad_habits(
-                    user_id=user.id,
+                    user_id=user_entity.id,
                     bad_habits_id=habit_id
                 )
                 session.add(user_habit)
@@ -152,50 +153,46 @@ async def create_user(user: UserAuth) -> Optional[User]:
             interest_ids = interests.all()
             for interest_id in interest_ids:
                 user_interest = t_user_interest(
-                    user_id=user.id,
+                    user_id=user_entity.id,
                     interest_id=interest_id
                 )
                 session.add(user_interest)
         
         await session.commit()
-        return user.id
+        return user_entity
 
 
-
-async def getregions():
+async def get_regions():
     async with get_session() as session:
         result = await session.exec(select(Region.title))
-        return result.all()
+        return list(result.all())
 
 
-async def get_cities_by_region_name(region_title: str):
+async def get_cities_by_region_name(region_title: str) -> List[str]:
     async with get_session() as session:
-        region_result = await session.exec(select(Region).where(Region.title == region_title))
-        region = region_result.first()
-
-        if not region:
-            raise HTTPException(status_code=404, detail="Регион не найден")
-
         cities_result = await session.exec(
-            select(Locality.name).where(Locality.region_id == region.id)
+            select(Locality.name)
+            .where(Region.title == region_title)
+            .join(Region, Region.id == Locality.region_id)
         )
-        return cities_result.all()
+        return list(cities_result.all())
 
-async def get_bad_habits():
+async def get_bad_habits() -> List[str]:
     async with get_session() as session:
         result = await session.exec(select(BadHabit.title))
-        return result.all()
+        return list(result.all())
 
-async def get_interests():
+async def get_interests() -> List[str]:
     async with get_session() as session:
         result = await session.exec(select(Interest.title))
-        return result.all()
+        return list(result.all())
 
 
-async def get_educ_dir():
+async def get_educ_dir() -> List[tuple[str, str]]:
     async with get_session() as session:
-        result = await session.exec(select(EducationDirection.code))
-        return result.all()
+        result = await session.exec(select(EducationDirection.code, EducationDirection.title))
+        return list(result.all())
+
 
 async def update_user(user_id: int, update_data: Dict[str, Any]) -> Optional[User]:
     # danya model
@@ -268,68 +265,11 @@ async def cache_recomendations(user_id: int):
     return recommendations
 
 
-async def write_opinion(user_id_req: int, user_id_rep: int, opinion: bool) -> Tuple[bool, Optional[Match]]:
-    async with get_session() as session:
-        # Проверка на взаимный лайк
-        mutual_like_query = select(UserResponse).where(
-            and_(
-                UserResponse.request_user_id == user_id_rep,
-                UserResponse.response_user_id == user_id_req,
-                UserResponse.opinion == True
-            )
-        )
-        mutual_like_result = await session.exec(mutual_like_query)
-        is_mutual = mutual_like_result.first()
-
-        # Сохраняем реакцию пользователя
-        response = UserResponse(
-            request_user_id=user_id_req,
-            response_user_id=user_id_rep,
-            opinion=opinion
-        )
-        session.add(response)
-        await session.commit()
-
-        # Если лайк взаимный — создаём Match
-        if opinion and is_mutual:
-            match = Match(
-                user1_id=min(user_id_req, user_id_rep),
-                user2_id=max(user_id_req, user_id_rep)
-            )
-            session.add(match)
-            await session.commit()
-            return True, match
-
-        return False, None
-
-async def get_matches(user_id: int) -> List[Dict[str, Any]]:
-    async with get_session() as session:
-        query = select(Match).where(
-            or_(
-                Match.user1_id == user_id,
-                Match.user2_id == user_id
-            )
-        )
-        result = await session.exec(query)
-        matches = result.all()
-        
-        # Получаем информацию о пользователях для каждого мэтча
-        match_data = []
-        for match in matches:
-            other_user_id = match.user2_id if match.user1_id == user_id else match.user1_id
-            other_user = await session.get(User, other_user_id)
-            match_data.append({
-                "match_id": match.id,
-                "user": other_user.dict(),
-                "created_at": match.created_at
-            })
-        
-        return match_data
-
 async def get_habitation() -> List[Habitation]:
     async with get_session() as session:
         result = await session.exec(select(Habitation))
         return result.all()
+
 
 async def create_habitation(name: str) -> Habitation:
     async with get_session() as session:
@@ -338,6 +278,7 @@ async def create_habitation(name: str) -> Habitation:
         await session.commit()
         await session.refresh(habitation)
         return habitation
+
 
 async def update_habitation(habitation_id: int, new_name: str) -> Optional[Habitation]:
     async with get_session() as session:
@@ -352,7 +293,7 @@ async def update_habitation(habitation_id: int, new_name: str) -> Optional[Habit
         return habitation
     
 
-async def get_matches(user_id: int):
+async def get_matches(user_id: int) -> Optional[list[int]]:
     async with get_session() as session:
         user_matches = await session.exec(
             select(UserResponse.response_user_id).where(

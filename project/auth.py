@@ -25,7 +25,7 @@ from utils import (
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
 
 @logs
@@ -106,11 +106,8 @@ async def register_user(user_data: UserAuth):
             detail="Email already registered"
         )
     
-    hashed_password = get_password_hash(user_data.hashed_password)
-    user_dict = user_data.model_dump(exclude={"hashed_password"})
-    user_dict.update({"hashed_password": hashed_password})
-
-    new_user = await create_user(user_dict)
+    user_data.hashed_password = get_password_hash(user_data.hashed_password)
+    new_user = await create_user(user_data)
     if new_user is None:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,

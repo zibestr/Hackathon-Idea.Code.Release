@@ -154,7 +154,7 @@ class UserData(BaseModel):
         about (str): Информация о пользователе.
     """
     name: str
-    photos: list[str]
+    photos: list[str] = list()
     gender: int
     age: int
     email: EmailStr
@@ -166,7 +166,7 @@ class UserData(BaseModel):
     educational_institution: str
     habits: list[str]
     interests: list[str]
-    budget: int
+    budget: Optional[int]
     about: str
 
 

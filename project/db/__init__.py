@@ -53,7 +53,22 @@ except (ModuleNotFoundError, ImportError) as e:
 from .queries import (
     get_user_by_email,
     create_user,
-    get_matches
+    get_regions,
+    get_cities_by_region_name,
+    get_bad_habits,
+    get_interests,
+    get_educ_dir,
+    update_user,
+    check_password,
+    get_recommendations,
+    cache_recomendations,
+    get_habitation,
+    create_habitation,
+    update_habitation,
+    get_matches,
+    get_all_matches,
+    store_user_relation,
+    get_user_relation
 )
 
 __all__ = [
@@ -83,5 +98,20 @@ __all__ = [
     # queries
     'get_user_by_email',
     'create_user',
-    'get_matches'
+    'get_regions',
+    'get_cities_by_region_name',
+    'get_bad_habits',
+    'get_interests',
+    'get_educ_dir',
+    'update_user',
+    'check_password',
+    'get_recommendations',
+    'cache_recomendations',
+    'get_habitation',
+    'create_habitation',
+    'update_habitation',
+    'get_matches',
+    'get_all_matches',
+    'store_user_relation',
+    'get_user_relation'
 ]
