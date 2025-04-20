@@ -131,4 +131,8 @@ export default {
     margin-top: 15px;
     width: 100%;
 }
+
+.home p{
+    font-size: 28px;
+}
 </style>
