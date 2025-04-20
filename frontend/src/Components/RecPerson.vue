@@ -132,7 +132,7 @@ export default {
     width: 100%;
 }
 
-.home p{
+.home p {
     font-size: 28px;
 }
 </style>

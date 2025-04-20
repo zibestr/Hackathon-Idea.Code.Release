@@ -23,5 +23,7 @@
     height: 200px;
     border: 1px solid #000;
     border-radius: 35px;
+    object-fit: cover;
+    object-position: top;
 }
 </style>
