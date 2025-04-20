@@ -27,7 +27,8 @@ from db import (
     UserScore,
     HabitationPhoto,
     Match,
-    Message
+    Message,
+    Interest
 )
 
 from utils import (
@@ -44,7 +45,8 @@ from utils import (
     TokenData,
     UserData,
     UserIdentify,
-    UserAuth
+    UserAuth,
+    MessageResponse
 )
 
 #TODO только один населенный пункт, анкета активна, ранжируется твоей морделью, если модель гг, то просто случайный порядок списка 
@@ -320,3 +322,51 @@ async def store_user_relation(hash_name: str, user_id: int, related_ids: list[in
 async def get_user_relation(hash_name: str, user_id: int) -> list[int]:
     value = await r.hget(hash_name, user_id)
     return json.loads(value) if value else []
+
+
+async def get_message_by_match(match_id: int) -> list[MessageResponse]:
+    async with get_session() as session:
+        result = await session.exec(select(Message.user_id, Message.message, Message.created_at).where(Message.match_id == match_id))
+
+        return [
+            MessageResponse(user_id=mess[1],
+                            message_text=mess[2], created_at=mess[3])
+            for mess in result.all()
+        ]
+
+
+async def get_user_data(user_id: int) -> list[UserData]:
+    async with get_session() as session:
+        result = await session.exec(
+            select(User.id,
+                   User.name,
+                   func.array_agg(UserPhoto.file_name).label('image_names'),
+                   User.gender,
+                   User.age,
+                   User.email,
+                   User.phone,
+                   User.vk_id,
+                   Region.title,
+                   Locality.name,
+                   EducationDirection.title,
+                   EducationalInstitution.short_name,
+                   func.array_agg(BadHabit.id).label("bad_habits_ids"),
+                   func.array_agg(Interest.id).label("interests_ids"),
+                   User.budget,
+                   User.about)
+            .join(UserPhoto, UserPhoto.user_id == User.id)
+            .join(Locality, Locality.id == User.locality_id)
+            .join(Region, Region.id == Locality.region_id)
+            .join(EducationalInstitution, EducationalInstitution.id == User.ei_id)
+            .join(EducationDirection, EducationDirection.id == User.education_direction)
+            .outerjoin(User.bad_habitss)
+            .outerjoin(User.interests)
+            .where(User.id == user_id)
+            .group_by(User.id)
+        )
+
+        return [
+            MessageResponse(user_id=mess[1],
+                            message_text=mess[2], created_at=mess[3])
+            for mess in result.all()
+        ]

@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field, EmailStr
 from typing import Optional
+from datetime import datetime
 
 
 class ModelReadiness(BaseModel):
@@ -188,3 +189,16 @@ class UserAuth(UserData):
         hashed_password (str): Хэшированный пароль пользователя.
     """
     hashed_password: str
+
+
+class MessageResponse(BaseModel):
+    """Модель сообщения пользователя.
+
+    Attributes:
+        user_id: int
+        message_text: str
+        created_at: datetime
+    """
+    user_id: int
+    message_text: str
+    created_at: datetime

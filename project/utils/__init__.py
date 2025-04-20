@@ -12,7 +12,8 @@ from .schemas import (
     TokenData,
     UserData,
     UserIdentify,
-    UserAuth
+    UserAuth,
+    MessageResponse
 )
 
 __all__ = [

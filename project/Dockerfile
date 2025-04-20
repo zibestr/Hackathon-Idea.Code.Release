@@ -1,4 +1,4 @@
-FROM python:3.9-slim
+FROM python:3.12-slim
 
 RUN apt-get update && apt-get install -y \
     build-essential \
@@ -14,7 +14,14 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 WORKDIR /app
 
-COPY * .
+COPY db ./db
+COPY utils ./utils
+COPY models ./models
+COPY auth.py .
+COPY config.py .
+COPY main.py .
+COPY chat.py .
+COPY .env .
 
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8841", "--reload"]
 

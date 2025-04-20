@@ -68,7 +68,8 @@ from .queries import (
     get_matches,
     get_all_matches,
     store_user_relation,
-    get_user_relation
+    get_user_relation,
+    get_message_by_match
 )
 
 __all__ = [

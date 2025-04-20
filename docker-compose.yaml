@@ -71,6 +71,7 @@ services:
       - project-net
     depends_on:
       - triton-orchestrator
+      - postgres
 
 networks:
   project-net:

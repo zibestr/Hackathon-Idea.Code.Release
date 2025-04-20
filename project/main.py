@@ -33,7 +33,8 @@ from db import (
     get_matches,
     get_all_matches,
     store_user_relation,
-    get_user_relation
+    get_user_relation,
+    get_message_by_match
 )
 
 from utils import (
@@ -46,7 +47,8 @@ from utils import (
     Token,
     TokenData,
     UserData,
-    UserAuth
+    UserAuth,
+    MessageResponse
 )
 
 
@@ -116,6 +118,16 @@ async def get_all_ed_dir():
                 for code, title in ed_dirs
             ]
     }
+
+
+@logs
+@app.get("/api/get_messages", response_model=List[MessageResponse])
+async def get_messages_endpoint(match_id: int):
+    messages = await get_message_by_match(
+        match_id
+    )
+    print(messages)
+    return messages
 
 
 @logs
