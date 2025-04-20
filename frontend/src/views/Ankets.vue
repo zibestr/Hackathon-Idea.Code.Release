@@ -23,7 +23,7 @@ const store = LineStore();
 export default {
     data() {
         return {
-            age: ""
+            age: "",
         }
     },
     methods: {
@@ -68,7 +68,7 @@ export default {
             <h3>Возраст</h3>
             <div class="age_input_div">
             <button class="sign_minus" @click="ClicMinusButton">-</button>
-                <input v-model="this.age" type="number" placeholder="Возраст" class="age_input">
+                <input v-model="age" type="number" placeholder="Возраст" class="age_input">
                 <button class="sign_plus" @click="ClickPlusButton()">+</button>
             </div>
         </div>
