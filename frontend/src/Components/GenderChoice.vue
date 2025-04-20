@@ -1,18 +1,41 @@
-<script setup>
+<script>
+
+export default {
+    data() {
+        return {
+            male_choice: false,
+            female_choice: false
+        }
+    },
+    methods: {
+        SetMale() {
+            this.male_choice = true;
+            this.female_choice = false;
+        },
+        SetFemale() {
+            this.male_choice = false;
+            this.female_choice = true;
+        }
+    }
+}
 
 </script>
 
 <template>
 <div class="gender_div">
-    <button>
-        <div class="indicator_dot"></div>
+    <button @click="SetMale()">
+        <div v-if="this.male_choice == true" class="selected_indicator_dot"></div>
+        <div v-else class="indicator_dot"></div>
         <div>
         <p>Мужской</p>
     </div>
     </button>
-    <button>
-        <div class="indicator_dot"></div>
-        Женский
+    <button @click="SetFemale()">
+        <div v-if="this.female_choice == true" class="selected_indicator_dot"></div>
+        <div v-else class="indicator_dot"></div>
+        <div>
+        <p>Женский</p>
+    </div>
     </button>
 </div>
 </template>
@@ -51,8 +74,20 @@ button {
     background-color: #ffffff;
 }
 
+.selected_indicator_dot {
+    width: 20px;
+    height: 20px;
+    border: 1px solid #000000;
+    border-radius: 50%;
+    background-color: #FF5E37;
+}
+
 
 p {
+    font-size: 20px;
+    font-family: 'Mulish';
+    color: #000000;
+
     flex: 1; /* Занимает всё доступное пространство */
   text-align: center; /* Выравнивание текста */
   margin-right: 26px; /* Компенсируем padding кнопки */
