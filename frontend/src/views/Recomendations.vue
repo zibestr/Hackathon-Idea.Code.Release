@@ -1,13 +1,20 @@
 <script setup>
 import PersonRec from '../Components/RecPerson.vue'
 import Filter from '../Components/Filter.vue'
+
+import IconFilter from '../assets/icons/IconFilter.vue';
 </script>
 
 <template>
 <div class="rec_div">
-    <!--<div class="filter_div">
+    <div class="this_filter_div">
+        <div class="filter_icon">
+        <IconFilter />
+    </div>
+        <div class="filter_box" style="visibility: hidden;">
         <Filter />
-    </div> -->
+    </div>
+</div>
     <PersonRec />
     <div class="buttons_div">
         <div class="no_button_position">
@@ -28,6 +35,7 @@ import Filter from '../Components/Filter.vue'
     flex-direction: column;
     margin-top: 80px;
     margin-bottom: 80px;
+    flex: 1;
 }
 
 .buttons_div {
@@ -65,5 +73,25 @@ import Filter from '../Components/Filter.vue'
     width: 100%;
     display: flex;
     justify-content: flex-end
+}
+
+.this_filter_div {
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 50px;
+}
+
+.filter_box {
+    margin-top: 25px;
+    position: absolute;
+    display: inline-flex;
+    right: 0px;
+    background-color: #fff;
+}
+
+.filter_icon {
+    margin-right: 50px;
 }
 </style>
