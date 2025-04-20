@@ -53,7 +53,13 @@ except (ModuleNotFoundError, ImportError) as e:
 from .queries import (
     get_user_by_email,
     create_user,
-    get_matches
+    get_matches,
+    write_opinion,
+    get_regions,
+    get_cities_by_region_name,
+    get_bad_habits,
+    get_interests,
+    get_educ_dir
 )
 
 __all__ = [
