@@ -1,9 +1,13 @@
 <script setup>
 import PersonRec from '../Components/RecPerson.vue'
+import Filter from '../Components/Filter.vue'
 </script>
 
 <template>
 <div class="rec_div">
+    <!--<div class="filter_div">
+        <Filter />
+    </div> -->
     <PersonRec />
     <div class="buttons_div">
         <div class="no_button_position">

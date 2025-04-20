@@ -118,6 +118,8 @@ import IconEducation from '../assets/icons/IconEducation.vue';
 
     margin-top: 30px;
     margin-bottom: 30px;
+    object-fit: cover;
+    object-position: top;
 }
 
 .main_info_div p {
@@ -180,6 +182,8 @@ import IconEducation from '../assets/icons/IconEducation.vue';
 
 .interests_list {
     margin-top: 30px;
+    display: flex;
+    flex-direction: column
 }
 .interests_list p {
     margin-top: 5px;
