@@ -22,5 +22,7 @@ const hender = [
 </template>
 
 <style>
-
+.name_input {
+    width: 880px;
+}
 </style>

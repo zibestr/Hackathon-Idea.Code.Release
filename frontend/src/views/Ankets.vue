@@ -12,10 +12,42 @@ import RegionsList from '../Components/Lists/RegionsList.vue'
 import LearnWaysList from '../Components/Lists/LearnWaysList.vue'
 import InterestList from '../Components/Lists/InterestsList.vue'
 import BadInterestsList from '../Components/Lists/BadInterestsList.vue'
+import InstitutList from '../Components/Lists/InstitutList.vue'
 
 import { LineStore } from '../stores/LineStates'
 
 const store = LineStore();
+</script>
+
+<script>
+export default {
+    data() {
+        return {
+            age: ""
+        }
+    },
+    methods: {
+        ClickPlusButton() {
+            if (this.age == "" || this.age <= 0) {
+                this.age = 1;
+            }
+            else {
+                this.age = Number(this.age) + 1;
+            }
+        },
+        ClicMinusButton() {
+            if (this.age == "") {
+                this.age = 150;
+            }
+            else if (this.age > 0 && this.age <= 150) {
+                this.age = Number(this.age) - 1;
+            }
+            else {
+                this.age = 150;
+            }
+        }
+    }
+}
 </script>
 
 <template>
@@ -35,9 +67,9 @@ const store = LineStore();
         <div>
             <h3>Возраст</h3>
             <div class="age_input_div">
-            <button class="sign_minus">-</button>
-                <input placeholder="Возраст" class="age_input">
-                <button class="sign_plus">+</button>
+            <button class="sign_minus" @click="ClicMinusButton">-</button>
+                <input v-model="this.age" type="number" placeholder="Возраст" class="age_input">
+                <button class="sign_plus" @click="ClickPlusButton()">+</button>
             </div>
         </div>
         <div class="vk_id_div">
@@ -63,6 +95,16 @@ const store = LineStore();
         </div>
         <div>
             <CitiesList />
+        </div>
+    </div>
+    <div class="anket_input_div">
+        <h3>Образовательное учреждение</h3>
+        <div class="region_input">
+            <input placeholder="Образовательное учреждение">
+            <IconRightStrelka />
+        </div>
+        <div>
+            <InstitutList />
         </div>
     </div>
     <div class="anket_input_div">
