@@ -3,14 +3,17 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-from typing import Optional
+from typing import Optional, Dict, Tuple, Annotated
 
 from config import settings
 from utils import logs
 from db import (
     get_user_by_email,
-    create_user
+    create_user,
+    get_matches,
+    get_all_matches
 )
+
 from utils import (
     ModelReadiness,
     TextRequest,
@@ -23,7 +26,7 @@ from utils import (
     UserAuth
 )
 
-router = APIRouter(prefix="/auth", tags=["Authentication"])
+router = APIRouter(prefix="/auth", tags=["auth"])
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
@@ -54,6 +57,7 @@ def create_access_token(data: dict) -> str:
     return jwt.encode(to_encode, settings.secret_key, algorithm=settings.encryption_algorithm)
 
 
+@logs
 async def get_current_user(token: str = Depends(oauth2_scheme)) -> UserData:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -77,14 +81,14 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> UserData:
 
 @logs
 async def get_current_active_user(current_user: UserData = Depends(get_current_user)) -> UserData:
-    if not current_user.is_active:
+    if not get_user_by_email(current_user.email).is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
 
 
 @logs
 @router.post("/token", response_model=Token)
-async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
+async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
     user = await authenticate_user(form_data.username, form_data.password)
     if not user:
         raise HTTPException(

@@ -12,7 +12,8 @@ from .schemas import (
     TokenData,
     UserData,
     UserIdentify,
-    UserAuth
+    UserAuth,
+    RecsResponse
 )
 
 __all__ = [
@@ -33,5 +34,6 @@ __all__ = [
     'TokenData',
     'UserData',
     'UserIdentify',
-    'UserAuth'
+    'UserAuth',
+    'RecsResponse'
 ]

@@ -2,7 +2,7 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from typing import Dict, Tuple
 from db import get_matches
 
-router = APIRouter()
+router = APIRouter(prefix="/chat", tags=["chat"])
 
 
 @router.websocket("/ws/{user_id}/{target_id}")

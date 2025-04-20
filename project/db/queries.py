@@ -62,12 +62,20 @@ async def get_user_by_email(email: str) -> Optional[User]:
             .where(User.email == email)
         )
         return result.first()
+    
+
+async def get_user(id: int) -> Optional[User]:
+    async with get_session() as session:
+        result = await session.exec(
+            select(User)
+            .where(User.id == id)
+        )
+        return result.first()
 
 
 async def create_user(user: UserAuth) -> Optional[User]:
     data = user.about
     ml_api_toxicity_state = requests.get(f'{settings.ml_api}/check_model_toxicity')
-    print(ml_api_toxicity_state.text)
     if data != '' and json.loads(ml_api_toxicity_state.text)['ready']:
         payload = dict(text=data)
         response = requests.post(f'{settings.ml_api}/predict_toxicity', data=payload)
@@ -194,75 +202,15 @@ async def get_educ_dir() -> List[tuple[str, str]]:
         return list(result.all())
 
 
-async def update_user(user_id: int, update_data: Dict[str, Any]) -> Optional[User]:
-    # danya model
+async def get_recs_for_user(email: str) -> List[User]:
     async with get_session() as session:
-        user = await session.get(User, user_id)
-        if not user:
-            return None
+        current_user = await get_user_by_email(email)
 
-        for key, value in update_data.items():
-            setattr(user, key, value)
-
-        session.add(user)
-        await session.commit()
-        await session.refresh(user)
-        return user
-
-
-async def check_password(user_email: str, user_password: str) -> bool:
-    user = await get_user_by_email(user_email)
-    if not user:
-        return False
-    return user.verify_password(user_password)
-
-
-# как получить id текущего пользователя который отправил запрос
-async def get_recommendations(user_id: int) -> List[Dict[str, Any]]:
-    async with get_session() as session:
-        # Получаем текущего пользователя
-        current_user = await session.get(User, user_id)
-        if not current_user or not current_user.questionnaire_active:
-            return []
-        
-        # Получаем ID уже просмотренных пользователей
-        viewed_result = await session.exec(
-            select(UserResponse.response_user_id)
-            .where(UserResponse.request_user_id == user_id)
+        viewed = await session.exec(
+            select(User)
+            .join(UserResponse, UserResponse.request_user_id == User.id)
         )
-        viewed_ids = [user_id] + [v[0] for v in viewed_result.all()]
-        
-        # Запрос на подходящих пользователей
-        query = select(User).where(
-            and_(
-                User.habitation_id == current_user.habitation_id,
-                User.questionnaire_active == True,
-                User.id.not_in(viewed_ids)
-            )
-        )
-        result = await session.exec(query)
-        users = result.all()
-        
-        # Перемешиваем, если модель не GG
-        if not current_user.is_gg_model:
-            random.shuffle(users)
-        
-        # Формируем ответ
-        return [
-            {
-                "user": user.dict(),
-                "searching_for": user.searching_for
-            }
-            for user in users
-        ]
-
-
-
-async def cache_recomendations(user_id: int):
-    # Здесь может быть логика кеширования в Redis или другом хранилище
-    recommendations = await get_recomendations(user_id)
-    # Реализация кеширования зависит от вашей инфраструктуры
-    return recommendations
+        return list(recs.all())
 
 
 async def get_habitation() -> List[Habitation]:
@@ -307,16 +255,16 @@ async def get_matches(user_id: int) -> Optional[list[int]]:
 async def get_all_matches():
     async with get_session() as session:
         all_user_matches = await session.exec(
-
+            #TODO DANYA WRITE IT PLEASE((((
         )
         return all_user_matches.all()
       
 
-async def store_user_relation(hash_name: str, user_id: int, related_ids: list[int]) -> None:
+async def store_user_relation(email: str, related_ids: list[int]) -> None:
     value = json.dumps(related_ids)
     await r.hset(hash_name, user_id, value)
 
 
-async def get_user_relation(hash_name: str, user_id: int) -> list[int]:
+async def get_user_relation(email: str, user_id: int) -> list[int]:
     value = await r.hget(hash_name, user_id)
     return json.loads(value) if value else []
