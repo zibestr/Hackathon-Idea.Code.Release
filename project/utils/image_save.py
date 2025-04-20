@@ -39,3 +39,25 @@ async def save_image(user_id: int,
     file_path = user_dir / filename
     await asyncio.to_thread(_process_and_save_image, file_path, base64_str)
     return str(file_path)
+
+
+async def get_images_base64(
+    user_id: int,
+    category: Literal["profile", "habitation"]
+) -> List[str]:
+    user_dir = Path(settings.data_path) / str(user_id)
+    if not user_dir.exists():
+        return []
+
+    image_files = sorted(user_dir.glob(f"{user_id}_{category}_*.jpg"))
+
+    base64_images = []
+
+    for image_path in image_files:
+        async with aiofiles.open(image_path, 'rb') as f:
+            image_data = await f.read()
+            encoded = base64.b64encode(image_data).decode('utf-8')
+            base64_images.append(f"data:image/jpeg;base64,{encoded}")
+
+    return base64_images
+

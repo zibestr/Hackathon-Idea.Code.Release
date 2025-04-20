@@ -3,9 +3,11 @@ from fastapi import FastAPI, Request, HTTPException, Depends, status, WebSocket,
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
+from fastapi.security import OAuth2PasswordRequestForm
+from chat import ConnectionManager
 from typing import Dict, List, AsyncGenerator
-
 from config import settings
+from db import init_db, write_opinion, get_regions, get_cities_by_region_name, get_bad_habits, get_interests, get_educ_dir
 from chat import router as chat_router
 from auth import router as auth_router
 from auth import (
@@ -51,6 +53,7 @@ from utils import (
     MessageResponse
 )
 
+manager = ConnectionManager()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
